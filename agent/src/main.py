@@ -22,7 +22,7 @@ def main():
         tools=[calculator]
     )
 
-    response = agent("What is 2+2")
+    response = agent("What's the square root of the numerical value of your favorite stock ticker? I know its AAPL.")
     print(response)
 
 
