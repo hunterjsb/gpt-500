@@ -1,9 +1,9 @@
-# the claude 20
-20 stocks meticulously hand-picked by Claude using home-grown artisinal research.
+# The ~~Claude 20~~ GPT 500
+~~20~~ 500 stocks meticulously hand-picked by ~~Claude~~ ChatGPT using home-grown artisinal research.
 
 ## Frontend
 ### Holdings List
-A list of positions and their weights, along with a comment from the editor, Claude.
+A list of positions and their weights, along with a comment from the editor, ~~Claude~~ ChatGPT.
 
 ### Holdings Chart
 A chart showing the performance of the holdings over time versus a benchmark index.
