@@ -1,0 +1,147 @@
+name: Update GitHub Pages
+
+on:
+  push:
+    paths:
+      - 'agent/md/indices/GPT20.md'
+    branches:
+      - master
+
+jobs:
+  update-pages:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Convert markdown to HTML
+      run: |
+        # Read the markdown file and convert to HTML
+        python3 << 'EOF'
+        import re
+        
+        # Read the markdown file
+        with open('agent/md/indices/GPT20.md', 'r') as f:
+            content = f.read()
+        
+        # Simple markdown to HTML conversion
+        html_content = content
+        
+        # Convert headers
+        html_content = re.sub(r'^# (.+)$', r'<h1>\1</h1>', html_content, flags=re.MULTILINE)
+        html_content = re.sub(r'^## (.+)$', r'<h2>\1</h2>', html_content, flags=re.MULTILINE)
+        html_content = re.sub(r'^### (.+)$', r'<h3>\1</h3>', html_content, flags=re.MULTILINE)
+        
+        # Convert bold text
+        html_content = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', html_content)
+        
+        # Convert italic text
+        html_content = re.sub(r'_(.+?)_', r'<em>\1</em>', html_content)
+        
+        # Convert line breaks to paragraphs and lists
+        lines = html_content.split('\n')
+        processed_lines = []
+        in_list = False
+        
+        for line in lines:
+            if line.strip() == '':
+                if in_list:
+                    processed_lines.append('</ol>')
+                    in_list = False
+                processed_lines.append('')
+            elif re.match(r'^\d+\.\s', line):
+                if not in_list:
+                    processed_lines.append('<ol>')
+                    in_list = True
+                # Extract number and content
+                match = re.match(r'^\d+\.\s(.+)', line)
+                if match:
+                    processed_lines.append(f'<li>{match.group(1)}</li>')
+            elif line.startswith('- '):
+                processed_lines.append(f'<li>{line[2:]}</li>')
+            elif line.startswith('<h') or line.startswith('</'):
+                if in_list:
+                    processed_lines.append('</ol>')
+                    in_list = False
+                processed_lines.append(line)
+            else:
+                if in_list:
+                    # This is likely a continuation of a list item
+                    if processed_lines and processed_lines[-1].startswith('<li>'):
+                        processed_lines[-1] = processed_lines[-1][:-5] + '<br>' + line + '</li>'
+                    else:
+                        processed_lines.append(line)
+                else:
+                    processed_lines.append(line)
+        
+        if in_list:
+            processed_lines.append('</ol>')
+        
+        html_body = '\n'.join(processed_lines)
+        
+        # Wrap in proper paragraphs
+        paragraphs = html_body.split('\n\n')
+        final_paragraphs = []
+        
+        for p in paragraphs:
+            p = p.strip()
+            if p and not p.startswith('<') and not p.endswith('>'):
+                final_paragraphs.append(f'<p>{p}</p>')
+            else:
+                final_paragraphs.append(p)
+        
+        html_body = '\n\n'.join(final_paragraphs)
+        
+        # Create full HTML document
+        full_html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT20 Stock Index</title>
+    <style>
+        body {{
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+        }}
+        h1 {{ color: #2c3e50; }}
+        h2 {{ color: #34495e; border-bottom: 2px solid #eee; padding-bottom: 10px; }}
+        h3 {{ color: #7f8c8d; }}
+        strong {{ color: #2980b9; }}
+        ol li {{ margin-bottom: 10px; }}
+        .last-updated {{ 
+            font-style: italic; 
+            color: #7f8c8d; 
+            text-align: center; 
+            margin-top: 40px;
+        }}
+    </style>
+</head>
+<body>
+    <div id="content">
+        {html_body}
+    </div>
+</body>
+</html>"""
+        
+        # Write to docs/index.html
+        with open('docs/index.html', 'w') as f:
+            f.write(full_html)
+        EOF
+        
+    - name: Commit and push changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add docs/index.html
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "Auto-update GitHub Pages from GPT20.md"
+          git push
+        fi
