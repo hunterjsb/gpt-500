@@ -5,50 +5,109 @@ import re
 with open('agent/md/indices/GPT20.md', 'r') as f:
     content = f.read()
 
-# Simple markdown to HTML conversion
-html_content = content
-html_content = re.sub(r'^# (.+)$', r'<h1>\1</h1>', html_content, flags=re.MULTILINE)
-html_content = re.sub(r'^## (.+)$', r'<h2>\1</h2>', html_content, flags=re.MULTILINE) 
-html_content = re.sub(r'^### (.+)$', r'<h3>\1</h3>', html_content, flags=re.MULTILINE)
-html_content = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', html_content)
-html_content = re.sub(r'_(.+?)_', r'<em>\1</em>', html_content)
-
-# Convert numbered lists
-lines = html_content.split('\n')
+# Process line by line to properly handle lists
+lines = content.split('\n')
 new_lines = []
 in_ol = False
+in_ul = False
 
-for line in lines:
-    if re.match(r'^\d+\.\s', line):
+for i, line in enumerate(lines):
+    # Headers
+    if line.startswith('# '):
+        if in_ol:
+            new_lines.append('</ol>')
+            in_ol = False
+        if in_ul:
+            new_lines.append('</ul>')
+            in_ul = False
+        new_lines.append(f'<h1>{line[2:]}</h1>')
+    elif line.startswith('## '):
+        if in_ol:
+            new_lines.append('</ol>')
+            in_ol = False
+        if in_ul:
+            new_lines.append('</ul>')
+            in_ul = False
+        new_lines.append(f'<h2>{line[3:]}</h2>')
+    elif line.startswith('### '):
+        if in_ol:
+            new_lines.append('</ol>')
+            in_ol = False
+        if in_ul:
+            new_lines.append('</ul>')
+            in_ul = False
+        new_lines.append(f'<h3>{line[4:]}</h3>')
+    # Numbered list items
+    elif re.match(r'^\d+\.\s', line):
+        if in_ul:
+            new_lines.append('</ul>')
+            in_ul = False
         if not in_ol:
             new_lines.append('<ol>')
             in_ol = True
         content = re.sub(r'^\d+\.\s(.+)', r'\1', line)
-        new_lines.append(f'<li>{content}</li>')
+        # Handle multi-line list items
+        next_line = lines[i+1] if i+1 < len(lines) else ''
+        if next_line.strip() and not next_line.startswith(('1.', '2.', '3.', '4.', '5.', '6.', '7.', '8.', '9.', '10.', '11.', '12.', '13.', '14.', '15.', '16.', '17.', '18.', '19.', '20.')) and not next_line.startswith(('#', '-')):
+            new_lines.append(f'<li>{content}<br>{next_line.strip()}</li>')
+            lines[i+1] = ''  # Skip the next line since we've included it
+        else:
+            new_lines.append(f'<li>{content}</li>')
+    # Bullet list items
     elif line.startswith('- '):
-        new_lines.append(f'<li>{line[2:]}</li>')
-    else:
-        if in_ol and line.strip() == '':
+        if in_ol:
             new_lines.append('</ol>')
             in_ol = False
-        new_lines.append(line)
+        if not in_ul:
+            new_lines.append('<ul>')
+            in_ul = True
+        new_lines.append(f'<li>{line[2:]}</li>')
+    # Empty lines - close lists if needed
+    elif line.strip() == '':
+        if in_ol:
+            new_lines.append('</ol>')
+            in_ol = False
+        if in_ul:
+            new_lines.append('</ul>')
+            in_ul = False
+        new_lines.append('')
+    # Regular content
+    else:
+        # Don't close lists for continuation lines that start with spaces
+        if not line.startswith('   '):
+            if in_ol:
+                new_lines.append('</ol>')
+                in_ol = False
+            if in_ul:
+                new_lines.append('</ul>')
+                in_ul = False
+        if line.strip():
+            new_lines.append(line)
 
+# Close any remaining lists
 if in_ol:
     new_lines.append('</ol>')
+if in_ul:
+    new_lines.append('</ul>')
 
 html_content = '\n'.join(new_lines)
 
-# Convert paragraphs
-html_content = re.sub(r'\n\n+', '</p>\n<p>', html_content)
-html_content = f'<p>{html_content}</p>'
+# Apply text formatting
+html_content = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', html_content)
+html_content = re.sub(r'_(.+?)_', r'<em>\1</em>', html_content)
 
-# Clean up headers and lists in paragraphs
-html_content = re.sub(r'<p>(<h[123]>)', r'\1', html_content)
-html_content = re.sub(r'(</h[123]>)</p>', r'\1', html_content)
-html_content = re.sub(r'<p>(</?ol>)', r'\1', html_content)
-html_content = re.sub(r'(</?ol>)</p>', r'\1', html_content)
-html_content = re.sub(r'<p>(<li>)', r'\1', html_content)
-html_content = re.sub(r'(</li>)</p>', r'\1', html_content)
+# Convert paragraphs (avoid wrapping headers and lists)
+paragraphs = html_content.split('\n\n')
+final_content = []
+
+for para in paragraphs:
+    para = para.strip()
+    if para and not para.startswith('<') and not para.endswith('>'):
+        final_content.append(f'<p>{para}</p>')
+    else:
+        final_content.append(para)
+
+html_content = '\n\n'.join(final_content)
 
 # Create full HTML
 full_html = f'''<!DOCTYPE html>
