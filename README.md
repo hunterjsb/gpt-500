@@ -15,4 +15,4 @@ The agent is Claude itself running in a loop, constantly doomscrolling financial
 Services are usually HTTPS RESTish APIs that can be called from the frontend, by the agent, or as an MCP.
 
 ## Docs
-https://xnmc.statuspage.io
+hunterjsb.github.io/gpt-500/
