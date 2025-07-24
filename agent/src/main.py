@@ -5,16 +5,13 @@ from strands_tools import calculator
 from pathlib import Path
 import os
 from datetime import datetime
+from .templates import format_template
 
 
 def main():
     # Load system prompt from SYSTEM.md
     system_prompt_path = Path(__file__).parent.parent / "md" / "prompts" / "SYSTEM.md"
     system_prompt = system_prompt_path.read_text(encoding="utf-8")
-
-    # Load update prompt template
-    update_prompt_path = Path(__file__).parent.parent / "md" / "prompts" / "UPDATE_PROMPT.md"
-    update_prompt_template = update_prompt_path.read_text(encoding="utf-8")
 
     # Path to the GPT20 index file
     index_file_path = Path(__file__).parent.parent / "md" / "indices" / "GPT20.md"
@@ -42,7 +39,8 @@ def main():
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     # Format the template with current values
-    prompt = update_prompt_template.format(
+    prompt = format_template(
+        "UPDATE_PROMPT",
         current_time=current_time,
         current_index=current_index if current_index else "FILE IS EMPTY - CREATE THE INITIAL INDEX"
     )
