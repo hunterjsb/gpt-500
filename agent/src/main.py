@@ -22,8 +22,9 @@ def main():
         tools=[calculator]
     )
 
-    response = agent("What's the square root of the numerical value of your favorite stock ticker? I know its AAPL.")
-    print(response)
+    while True:
+        prompt = input("\n---\nsay something: ")
+        agent(prompt)
 
 
 if __name__ == "__main__":
