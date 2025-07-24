@@ -27,17 +27,29 @@ while i < len(lines):
     if re.match(r'^\d+\.\s', line):
         result_lines.append('<ol>')
         
-        # Process all consecutive numbered list items
-        while i < len(lines) and re.match(r'^\d+\.\s', lines[i]):
-            list_content = re.sub(r'^\d+\.\s(.+)', r'\1', lines[i])
+        # Process all numbered list items (including ones separated by empty lines)
+        while i < len(lines):
+            current_line = lines[i]
             
-            # Check if next line is description (indented or continuation)
-            if i + 1 < len(lines) and lines[i + 1].strip() and not re.match(r'^\d+\.\s', lines[i + 1]) and not lines[i + 1].startswith('#'):
-                description = lines[i + 1].strip()
-                result_lines.append(f'<li>{list_content}<br>{description}</li>')
-                i += 2  # Skip both lines
+            if re.match(r'^\d+\.\s', current_line):
+                list_content = re.sub(r'^\d+\.\s(.+)', r'\1', current_line)
+                
+                # Check if next line is description (indented or continuation)
+                if i + 1 < len(lines) and lines[i + 1].strip() and not re.match(r'^\d+\.\s', lines[i + 1]) and not lines[i + 1].startswith('#'):
+                    description = lines[i + 1].strip()
+                    result_lines.append(f'<li>{list_content}<br>{description}</li>')
+                    i += 2  # Skip both lines
+                else:
+                    result_lines.append(f'<li>{list_content}</li>')
+                    i += 1
+                
+                # Skip empty lines after list items
+                while i < len(lines) and lines[i].strip() == '':
+                    i += 1
             else:
-                result_lines.append(f'<li>{list_content}</li>')
+                # If we hit a non-numbered line that's not empty, break
+                if current_line.strip():
+                    break
                 i += 1
         
         result_lines.append('</ol>')
