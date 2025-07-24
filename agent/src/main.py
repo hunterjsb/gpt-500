@@ -12,6 +12,10 @@ def main():
     system_prompt_path = Path(__file__).parent.parent / "md" / "prompts" / "SYSTEM.md"
     system_prompt = system_prompt_path.read_text(encoding="utf-8")
 
+    # Load update prompt template
+    update_prompt_path = Path(__file__).parent.parent / "md" / "prompts" / "UPDATE_PROMPT.md"
+    update_prompt_template = update_prompt_path.read_text(encoding="utf-8")
+
     # Path to the GPT20 index file
     index_file_path = Path(__file__).parent.parent / "md" / "indices" / "GPT20.md"
 
@@ -37,28 +41,11 @@ def main():
     # Prepare the prompt for the agent
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    prompt = f"""
-Current time: {current_time}
-
-You are maintaining the GPT20 index - a curated list of 20 stocks that you hand-pick based on your analysis.
-
-Current GPT20.md content:
-{current_index if current_index else "FILE IS EMPTY - CREATE THE INITIAL INDEX"}
-
-Your task:
-1. Read and analyze the current state of the GPT20 index
-2. Think about market conditions, recent events, and stock performance
-3. Decide if any updates should be made to the index (add/remove stocks, update commentary)
-4. Write the complete updated GPT20.md file content
-
-The file should contain:
-- A brief header explaining what GPT20 is
-- List of 20 stocks with ticker symbols
-- Brief rationale for each selection or recent changes
-- Last updated timestamp
-
-Please provide the complete file content that should be written to GPT20.md.
-"""
+    # Format the template with current values
+    prompt = update_prompt_template.format(
+        current_time=current_time,
+        current_index=current_index if current_index else "FILE IS EMPTY - CREATE THE INITIAL INDEX"
+    )
 
     # Get agent's response
     response = agent(prompt)
