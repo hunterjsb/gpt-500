@@ -11,7 +11,7 @@ A list of positions and their weights, along with a comment from the editor, ~~C
 A chart showing the performance of the holdings over time versus a benchmark index.
 
 ## Agent
-The agent is Claude itself running in a loop, constantly doomscrolling financials news and refining its approach.
+The agent is ChatGPT running as a swarm of agents, constantly doomscrolling financials news and refining its approach to perfectly tune the GPT-20.
 
 ## Services
 Services are usually HTTPS RESTish APIs that can be called from the frontend, by the agent, or as an MCP.
