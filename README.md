@@ -3,7 +3,7 @@
 
 ## Frontend
 ### Holdings List
-### **See it here: :octocat: https://hunterjsb.github.io/gpt-500/**
+**See it here: :octocat: https://hunterjsb.github.io/gpt-500/**
 
 A list of positions and their weights, along with a comment from the editor, ~~Claude~~ ChatGPT.
 
