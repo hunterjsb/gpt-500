@@ -5,13 +5,12 @@ from strands_tools import calculator
 from pathlib import Path
 import os
 from datetime import datetime
-from .templates import format_template
+from .templates import load_system_prompt, load_update_prompt
 
 
 def main():
-    # Load system prompt from SYSTEM.md
-    system_prompt_path = Path(__file__).parent.parent / "md" / "prompts" / "SYSTEM.md"
-    system_prompt = system_prompt_path.read_text(encoding="utf-8")
+    # Load system prompt
+    system_prompt = load_system_prompt()
 
     # Path to the GPT20 index file
     index_file_path = Path(__file__).parent.parent / "md" / "indices" / "GPT20.md"
@@ -37,13 +36,7 @@ def main():
 
     # Prepare the prompt for the agent
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    # Format the template with current values
-    prompt = format_template(
-        "UPDATE_PROMPT",
-        current_time=current_time,
-        current_index=current_index if current_index else "FILE IS EMPTY - CREATE THE INITIAL INDEX"
-    )
+    prompt = load_update_prompt(current_time, current_index)
 
     # Get agent's response
     response = agent(prompt)

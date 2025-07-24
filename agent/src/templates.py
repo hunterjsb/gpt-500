@@ -124,3 +124,26 @@ def safe_format_template(template_name: str, **kwargs: Any) -> str:
 def list_templates() -> list[str]:
     """List available templates using the default template loader."""
     return _default_loader.list_templates()
+
+
+def load_system_prompt() -> str:
+    """Load the system prompt from SYSTEM.md."""
+    return load_template("SYSTEM")
+
+
+def load_update_prompt(current_time: str, current_index: str) -> str:
+    """
+    Load and format the update prompt with current values.
+
+    Args:
+        current_time: Current timestamp string
+        current_index: Current GPT20 index content or empty message
+
+    Returns:
+        Formatted update prompt
+    """
+    return format_template(
+        "UPDATE_PROMPT",
+        current_time=current_time,
+        current_index=current_index if current_index else "FILE IS EMPTY - CREATE THE INITIAL INDEX"
+    )
