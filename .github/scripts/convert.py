@@ -5,111 +5,70 @@ import re
 with open('agent/md/indices/GPT20.md', 'r') as f:
     content = f.read()
 
-# Process line by line to properly handle lists
-lines = content.split('\n')
-new_lines = []
-in_ol = False
-in_ul = False
+# Convert headers
+html_content = content
+html_content = re.sub(r'^# (.+)$', r'<h1>\1</h1>', html_content, flags=re.MULTILINE)
+html_content = re.sub(r'^## (.+)$', r'<h2>\1</h2>', html_content, flags=re.MULTILINE) 
+html_content = re.sub(r'^### (.+)$', r'<h3>\1</h3>', html_content, flags=re.MULTILINE)
 
-for i, line in enumerate(lines):
-    # Headers
-    if line.startswith('# '):
-        if in_ol:
-            new_lines.append('</ol>')
-            in_ol = False
-        if in_ul:
-            new_lines.append('</ul>')
-            in_ul = False
-        new_lines.append(f'<h1>{line[2:]}</h1>')
-    elif line.startswith('## '):
-        if in_ol:
-            new_lines.append('</ol>')
-            in_ol = False
-        if in_ul:
-            new_lines.append('</ul>')
-            in_ul = False
-        new_lines.append(f'<h2>{line[3:]}</h2>')
-    elif line.startswith('### '):
-        if in_ol:
-            new_lines.append('</ol>')
-            in_ol = False
-        if in_ul:
-            new_lines.append('</ul>')
-            in_ul = False
-        new_lines.append(f'<h3>{line[4:]}</h3>')
-    # Numbered list items
-    elif re.match(r'^\d+\.\s', line):
-        if in_ul:
-            new_lines.append('</ul>')
-            in_ul = False
-        if not in_ol:
-            new_lines.append('<ol>')
-            in_ol = True
-        content = re.sub(r'^\d+\.\s(.+)', r'\1', line)
-        # Handle multi-line list items
-        next_line = lines[i+1] if i+1 < len(lines) else ''
-        if next_line.strip() and not next_line.startswith(('1.', '2.', '3.', '4.', '5.', '6.', '7.', '8.', '9.', '10.', '11.', '12.', '13.', '14.', '15.', '16.', '17.', '18.', '19.', '20.')) and not next_line.startswith(('#', '-')):
-            new_lines.append(f'<li>{content}<br>{next_line.strip()}</li>')
-            lines[i+1] = ''  # Skip the next line since we've included it
-        else:
-            new_lines.append(f'<li>{content}</li>')
-    # Bullet list items
-    elif line.startswith('- '):
-        if in_ol:
-            new_lines.append('</ol>')
-            in_ol = False
-        if not in_ul:
-            new_lines.append('<ul>')
-            in_ul = True
-        new_lines.append(f'<li>{line[2:]}</li>')
-    # Empty lines - close lists if needed
-    elif line.strip() == '':
-        if in_ol:
-            new_lines.append('</ol>')
-            in_ol = False
-        if in_ul:
-            new_lines.append('</ul>')
-            in_ul = False
-        new_lines.append('')
-    # Regular content
-    else:
-        # Don't close lists for continuation lines that start with spaces
-        if not line.startswith('   '):
-            if in_ol:
-                new_lines.append('</ol>')
-                in_ol = False
-            if in_ul:
-                new_lines.append('</ul>')
-                in_ul = False
-        if line.strip():
-            new_lines.append(line)
-
-# Close any remaining lists
-if in_ol:
-    new_lines.append('</ol>')
-if in_ul:
-    new_lines.append('</ul>')
-
-html_content = '\n'.join(new_lines)
-
-# Apply text formatting
+# Convert bold and italic text
 html_content = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', html_content)
 html_content = re.sub(r'_(.+?)_', r'<em>\1</em>', html_content)
 
-# Convert paragraphs (avoid wrapping headers and lists)
+# Process numbered lists properly
+lines = html_content.split('\n')
+result_lines = []
+i = 0
+
+while i < len(lines):
+    line = lines[i]
+    
+    # Check if this is the start of a numbered list
+    if re.match(r'^\d+\.\s', line):
+        result_lines.append('<ol>')
+        
+        # Process all consecutive numbered list items
+        while i < len(lines) and re.match(r'^\d+\.\s', lines[i]):
+            list_content = re.sub(r'^\d+\.\s(.+)', r'\1', lines[i])
+            
+            # Check if next line is description (indented or continuation)
+            if i + 1 < len(lines) and lines[i + 1].strip() and not re.match(r'^\d+\.\s', lines[i + 1]) and not lines[i + 1].startswith('#'):
+                description = lines[i + 1].strip()
+                result_lines.append(f'<li>{list_content}<br>{description}</li>')
+                i += 2  # Skip both lines
+            else:
+                result_lines.append(f'<li>{list_content}</li>')
+                i += 1
+        
+        result_lines.append('</ol>')
+    elif line.startswith('- '):
+        # Handle bullet lists
+        result_lines.append('<ul>')
+        while i < len(lines) and lines[i].startswith('- '):
+            content = lines[i][2:]
+            result_lines.append(f'<li>{content}</li>')
+            i += 1
+        result_lines.append('</ul>')
+    else:
+        result_lines.append(line)
+        i += 1
+
+html_content = '\n'.join(result_lines)
+
+# Convert paragraphs
 paragraphs = html_content.split('\n\n')
 final_content = []
 
 for para in paragraphs:
     para = para.strip()
-    if para and not para.startswith('<') and not para.endswith('>'):
+    if para and not para.startswith('<') and not re.match(r'.*</?(h[123]|ol|ul|li).*>', para):
         final_content.append(f'<p>{para}</p>')
-    else:
+    elif para:
         final_content.append(para)
 
 html_content = '\n\n'.join(final_content)
 
-# Create full HTML
+# Create full HTML document
 full_html = f'''<!DOCTYPE html>
 <html lang="en">
 <head>
