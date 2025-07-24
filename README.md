@@ -1,4 +1,4 @@
-# The ~~Claude 20~~ GPT 500
+# The GPT-20
 20 stocks meticulously hand-picked by ChatGPT using home-grown artisinal research.
 
 ## Frontend
