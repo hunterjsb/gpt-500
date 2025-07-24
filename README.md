@@ -1,8 +1,9 @@
 # The ~~Claude 20~~ GPT 500
-~~20~~ 500 stocks meticulously hand-picked by ~~Claude~~ ChatGPT using home-grown artisinal research.
+20 stocks meticulously hand-picked by ChatGPT using home-grown artisinal research.
 
 ## Frontend
 ### Holdings List
+**See it here: :octocat: https://hunterjsb.github.io/gpt-500/**
 A list of positions and their weights, along with a comment from the editor, ~~Claude~~ ChatGPT.
 
 ### Holdings Chart
@@ -15,4 +16,4 @@ The agent is Claude itself running in a loop, constantly doomscrolling financial
 Services are usually HTTPS RESTish APIs that can be called from the frontend, by the agent, or as an MCP.
 
 ## Docs
-hunterjsb.github.io/gpt-500/
+Just ask Claude about the repo.
