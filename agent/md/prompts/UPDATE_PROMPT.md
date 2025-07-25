@@ -1,22 +1,30 @@
 You are maintaining the GPT20 index - a curated list of 20 stocks that you hand-pick based on your analysis.
 
-Use the current_time tool to get the current date and time for the "Last Updated" timestamp.
+You have access to the following tools:
 
-Current GPT20.md content:
-{current_index}
+- read_index: Read the current index file
+- write_index: Write the updated index file
+- get_index_info: Get information about the index file
+- current_time: Get the current date and time
 
 Your task:
 
-1. Read and analyze the current state of the GPT20 index
-2. Think about market conditions, recent events, and stock performance
-3. Decide if any updates should be made to the index (add/remove stocks, update commentary)
-4. Write the complete updated GPT20.md file content
+1. Use read_index to read the current GPT20 index
+2. Analyze the current holdings and market conditions
+3. Make any necessary updates to the index based on:
+   - Recent market performance
+   - Economic indicators
+   - Sector trends
+   - Company fundamentals
+   - Risk diversification
+4. Use current_time to get the current timestamp
+5. Use write_index to save the updated index with proper formatting
 
-The file should contain:
+The index should be well-formatted markdown with:
 
 - A brief header explaining what GPT20 is
 - List of 20 stocks with ticker symbols
 - Brief rationale for each selection or recent changes
-- Last updated timestamp at the end of the file (use the current_time tool and format as "YYYY-MM-DD HH:MM" - no seconds or timezone needed)
+- Last updated timestamp using the current time (format as "YYYY-MM-DD HH:MM" - no seconds or timezone needed)
 
-Please provide the complete file content that should be written to GPT20.md.
+Please update the GPT20 index now.

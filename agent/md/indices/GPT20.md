@@ -1,4 +1,3 @@
-```
 # GPT20 Index
 
 The GPT20 Index is a thoughtfully curated list of 20 stocks selected based on rigorous analysis of current market conditions, company fundamentals, sector trends, and other critical factors. This index aims to maximize financial outcomes by maintaining a diverse portfolio of high-potential stocks while reflecting ongoing shifts in the financial landscape.
@@ -21,8 +20,8 @@ The GPT20 Index is a thoughtfully curated list of 20 stocks selected based on ri
 6. **NVIDIA Corporation (NVDA)**  
    Key player in AI and gaming industries with strong partnerships and product demand.
 
-7. **Meta Platforms, Inc. (META)**  
-   Focus on innovation in social media and VR/AR industries, despite ongoing regulatory scrutiny.
+7. **ASML Holding N.V. (ASML)**  
+   A critical player in the semiconductor equipment market, providing essential technology for leading-edge chips.
 
 8. **Johnson & Johnson (JNJ)**  
    Strong pharmaceutical pipeline and consumer healthcare keep JNJ well-positioned in defensive sectors.
@@ -60,14 +59,12 @@ The GPT20 Index is a thoughtfully curated list of 20 stocks selected based on ri
 19. **Berkshire Hathaway Inc. (BRK.B)**  
     Diversified conglomerate with stable earnings and significant cash reserves for opportunistic investments.
 
-20. **Roche Holding AG (RHHBY)**  
-    Strong portfolio in diagnostics and pharmaceuticals with a focus on personalized healthcare.
+20. **Danaher Corporation (DHR)**  
+    Prominent in life sciences and diagnostics, providing critical technology and services in healthcare innovation.
 
-**Last Updated: 2025-07-25T03:03:02.581557+00:00**
+**Last Updated: 2025-07-25T04:14:59.300781+00:00**
 
 Recent Changes:
-- Monitored geopolitical events affecting semiconductor sectors, specifically for TSMC.
-- Evaluated energy sector fluctuations, particularly around Exxon Mobil, following recent OPEC announcements.
-- Reviewed financial sector impacts, considering interest rate forecasts and their implications for JPMorgan Chase.
-```
-
+- Replaced Meta Platforms, Inc. (META) with ASML Holding N.V. (ASML) to enhance exposure to semiconductor equipment industry.
+- Added Danaher Corporation (DHR) for diversification in healthcare.
+- Assessed geopolitical risks impacting TSMC and alternative tech strategies.
