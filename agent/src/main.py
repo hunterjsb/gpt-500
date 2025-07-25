@@ -8,8 +8,6 @@ from .config import MODEL_ID, API_KEY, INDEX_NAME, TIME_FORMAT
 
 
 def main():
-
-
     agent = Agent(
         model=OpenAIModel(client_args={"api_key": API_KEY}, model_id=MODEL_ID),
         system_prompt=load_template("SYSTEM"),
