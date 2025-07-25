@@ -6,7 +6,7 @@ from string import Template
 
 class TemplateLoader:
     def __init__(self, templates_dir=None):
-        self.templates_dir = templates_dir or Path(__file__).parent.parent / "md" / "prompts"
+        self.templates_dir = templates_dir or Path(__file__).parent.parent.parent / "md" / "prompts"
 
     def load_template(self, template_name):
         if not template_name.endswith('.md'):
@@ -29,7 +29,7 @@ format_template = _loader.format_template
 def _get_index_path(index_name):
     if not index_name.endswith('.md'):
         index_name += '.md'
-    return Path(__file__).parent.parent / "md" / "indices" / index_name
+    return Path(__file__).parent.parent.parent / "md" / "indices" / index_name
 
 
 def read_index_for_update(index_name):

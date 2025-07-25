@@ -2,7 +2,7 @@ from strands import Agent
 from strands.models.openai import OpenAIModel
 from strands_tools import calculator, current_time
 
-from .templates import load_template
+from .tools.templates import load_template
 from .config import MODEL_ID, API_KEY
 from .tools import read_index, write_index, get_index_info
 
@@ -14,13 +14,9 @@ def main():
         tools=[calculator, current_time, read_index, write_index, get_index_info]
     )
 
-    # Prepare the prompt for the agent using the template system
+    # update the index, it should use its tools to read & write to the file
     prompt = load_template("UPDATE_PROMPT")
-
-    # Get agent's response - let it handle everything
-    response = agent(prompt)
-    print("GPT20 index update completed")
-    print("Agent response:", response)
+    agent(prompt)
 
 
 if __name__ == "__main__":

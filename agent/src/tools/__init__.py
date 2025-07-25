@@ -1,5 +1,7 @@
 """
-Custom tools for the GPT20 agent using the @tool decorator.
+Tools module for the GPT20 agent.
+
+This module exports all available tools for use with the Strands agent framework.
 """
 
 from strands.tools.decorator import tool
@@ -74,3 +76,7 @@ def get_index_info(index_name: str) -> dict:
             "path": str(index_path),
             "message": f"Index file '{index_name}' does not exist"
         }
+
+
+# Export tools for easy import
+__all__ = ['read_index', 'write_index', 'get_index_info']
