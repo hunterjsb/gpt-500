@@ -4,12 +4,12 @@ from strands_tools import calculator
 
 import os
 from datetime import datetime
-from .templates import load_system_prompt, load_update_prompt, read_index_for_update, write_index
+from .templates import load_template, format_template, read_index_for_update, write_index
 
 
 def main():
     # Load system prompt
-    system_prompt = load_system_prompt()
+    system_prompt = load_template("SYSTEM")
 
     # Name of the index file to manage
     index_name = "GPT20"
@@ -27,7 +27,7 @@ def main():
 
     # Prepare the prompt for the agent
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    prompt = load_update_prompt(current_time, current_index)
+    prompt = format_template("UPDATE_PROMPT", current_time=current_time, current_index=current_index)
 
     # Get agent's response
     response = agent(prompt)
