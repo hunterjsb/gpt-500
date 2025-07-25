@@ -8,15 +8,14 @@ from .templates import load_template, format_template, read_index_for_update, wr
 
 
 def main():
-    # Load system prompt
-    system_prompt = load_template("SYSTEM")
-
     # Name of the index file to manage
     index_name = "GPT20"
 
-    model = OpenAIModel(client_args={"api_key": os.environ["OPENAI_API_KEY"]}, model_id="gpt-4o")
-
-    agent = Agent(model=model, system_prompt=system_prompt, tools=[calculator])
+    agent = Agent(
+        model=OpenAIModel(client_args={"api_key": os.environ["OPENAI_API_KEY"]}, model_id="gpt-4o"),
+        system_prompt=load_template("SYSTEM"),
+        tools=[calculator]
+    )
 
     # Read current index file
     current_index, file_exists = read_index_for_update(index_name)
