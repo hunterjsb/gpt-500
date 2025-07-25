@@ -14,4 +14,4 @@ import runpy
 
 if __name__ == "__main__":
     # Delegate execution to the agent package's __main__.py
-    runpy.run_module('agent', run_name="__main__", alter_sys=True)
+    runpy.run_module("agent", run_name="__main__", alter_sys=True)
