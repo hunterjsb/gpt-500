@@ -8,6 +8,3 @@ API_KEY = os.environ.get("OPENAI_API_KEY")
 
 # Index file configuration
 INDEX_NAME = "GPT20"
-
-# Time format
-TIME_FORMAT = "%Y-%m-%d %H:%M:%S"

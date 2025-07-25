@@ -1,17 +1,16 @@
 from strands import Agent
 from strands.models.openai import OpenAIModel
-from strands_tools import calculator
+from strands_tools import calculator, current_time
 
-from datetime import datetime
 from .templates import load_template, format_template, read_index_for_update, write_index
-from .config import MODEL_ID, API_KEY, INDEX_NAME, TIME_FORMAT
+from .config import MODEL_ID, API_KEY, INDEX_NAME
 
 
 def main():
     agent = Agent(
         model=OpenAIModel(client_args={"api_key": API_KEY}, model_id=MODEL_ID),
         system_prompt=load_template("SYSTEM"),
-        tools=[calculator]
+        tools=[calculator, current_time]
     )
 
     # Read current index file
@@ -22,8 +21,7 @@ def main():
         print("No existing index file found - will create new one")
 
     # Prepare the prompt for the agent
-    current_time = datetime.now().strftime(TIME_FORMAT)
-    prompt = format_template("UPDATE_PROMPT", current_time=current_time, current_index=current_index)
+    prompt = format_template("UPDATE_PROMPT", current_index=current_index)
 
     # Get agent's response
     response = agent(prompt)
@@ -38,8 +36,8 @@ def main():
     # Write to the index file
     file_path = write_index(INDEX_NAME, str(file_content))
 
-    print(f"GPT20 index updated at {current_time}")
-    print(f"File written to: {file_path}")
+    print("GPT20 index updated")
+    print("File written to: ", file_path)
 
 
 if __name__ == "__main__":
