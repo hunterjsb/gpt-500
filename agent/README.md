@@ -39,3 +39,7 @@ PATH=/usr/local/bin:/usr/bin:/bin
 Install with: `crontab -e` then paste the above.
 
 The agent reads the current GPT20.md file, analyzes market conditions, and updates the stock selections with rationale.
+
+## Custom Tools
+
+The agent uses custom tools defined in `src/tools/` for file operations like reading and writing the GPT20 index. New tools can be added by creating `@tool` decorated functions in `src/tools/__init__.py`.
