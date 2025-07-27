@@ -1,30 +1,63 @@
-You are maintaining the GPT20 index - a curated list of 20 stocks that you hand-pick based on your analysis.
+# GPT20 Index Update Task
 
-You have access to the following tools:
+You are updating the GPT20 index using the provided tools. Follow these steps exactly:
 
-- read_index: Read the current index file
-- write_index: Write the updated index file
-- get_index_info: Get information about the index file
-- current_time: Get the current date and time
+## Step 1: Read Current Index
 
-Your task:
+Use the `read_index` tool with parameter `index_name: "GPT20"` to read the current index file.
 
-1. Use read_index to read the current GPT20 index
-2. Analyze the current holdings and market conditions
-3. Make any necessary updates to the index based on:
-   - Recent market performance
-   - Economic indicators
-   - Sector trends
-   - Company fundamentals
-   - Risk diversification
-4. Use current_time to get the current timestamp
-5. Use write_index to save the updated index with proper formatting
+If the tool fails or returns an error, explain what went wrong and stop.
 
-The index should be well-formatted markdown with:
+## Step 2: Get Current Time
 
-- A brief header explaining what GPT20 is
-- List of 20 stocks with ticker symbols
-- Brief rationale for each selection or recent changes
-- Last updated timestamp using the current time (format as "YYYY-MM-DD HH:MM" - no seconds or timezone needed)
+Use the `current_time` tool to get the current timestamp for the update.
 
-Please update the GPT20 index now.
+If the tool fails or returns an error, explain what went wrong and stop.
+
+## Step 3: Analyze and Update
+
+Based on the current index content, analyze:
+
+- Market performance since last update
+- Economic indicators and sector trends
+- Individual stock fundamentals
+- Portfolio diversification
+- Better opportunities available
+
+Make decisions about which stocks to keep, remove, or add.
+
+## Step 4: Write Updated Index
+
+Use the `write_index` tool with parameters:
+
+- `index_name: "GPT20"`
+- `content: [your complete markdown content]`
+
+The content must include:
+
+- Header explaining GPT20 purpose
+- Exactly 20 stocks in numbered list format
+- Brief rationale for each stock
+- Current timestamp from Step 2
+- Summary of any changes made
+
+If the write_index tool fails, explain what went wrong and try again with corrected content.
+
+## Error Handling
+
+If any tool call fails:
+
+1. Report the specific error
+2. Explain what you were trying to do
+3. If possible, suggest what might be wrong
+4. Do not proceed to the next step until the current step succeeds
+
+## Success Confirmation
+
+After successfully writing the index, confirm:
+
+- Which tool calls were made
+- What changes were made to the index
+- The file was written successfully
+
+You MUST use the tools - do not output file content directly.
