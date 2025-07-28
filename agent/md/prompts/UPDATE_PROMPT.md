@@ -1,6 +1,6 @@
 # GPT20 Index Update Task
 
-You are updating the GPT20 index using the provided tools. Follow these steps exactly:
+You are updating the GPT20 index using the provided tools. You have access to financial data tools to help make informed decisions. Follow these steps exactly:
 
 ## Step 1: Read Current Index
 
@@ -14,7 +14,17 @@ Use the `current_time` tool to get the current timestamp for the update.
 
 If the tool fails or returns an error, explain what went wrong and stop.
 
-## Step 3: Analyze and Update
+## Step 3: Gather Market Data (Optional but Recommended)
+
+Use the financial data tools to inform your decisions:
+
+- `get_market_summary()` - Get major market indices performance
+- `get_stock_info(ticker)` - Get current price and fundamentals for specific stocks
+- `get_stock_history(ticker, period)` - Get historical performance (periods: 1d, 5d, 1mo, 3mo, 6mo, 1y, etc.)
+- `get_multiple_stocks_info(tickers)` - Get info for multiple stocks (comma-separated)
+- `compare_stocks_performance(tickers, period)` - Compare multiple stocks' performance
+
+## Step 4: Analyze and Update
 
 Based on the current index content, analyze:
 
@@ -26,7 +36,7 @@ Based on the current index content, analyze:
 
 Make decisions about which stocks to keep, remove, or add.
 
-## Step 4: Write Updated Index
+## Step 5: Write Updated Index
 
 Use the `write_index` tool with parameters:
 

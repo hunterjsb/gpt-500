@@ -6,6 +6,13 @@ This module exports all available tools for use with the Strands agent framework
 
 from strands.tools.decorator import tool
 from .templates import _get_index_path, read_index_for_update as _read_index_for_update, write_index as _write_index
+from .financial_data import (
+    get_stock_info as _get_stock_info,
+    get_stock_history as _get_stock_history,
+    get_multiple_stocks_info as _get_multiple_stocks_info,
+    compare_stocks_performance as _compare_stocks_performance,
+    get_market_summary as _get_market_summary
+)
 
 
 @tool
@@ -78,5 +85,77 @@ def get_index_info(index_name: str) -> dict:
         }
 
 
+@tool
+def get_stock_info(ticker: str) -> dict:
+    """
+    Get basic stock information and current price.
+
+    Args:
+        ticker: Stock ticker symbol (e.g., "AAPL")
+
+    Returns:
+        dict with stock information including price, market cap, ratios, etc.
+    """
+    return _get_stock_info(ticker)
+
+
+@tool
+def get_stock_history(ticker: str, period: str = "1mo") -> dict:
+    """
+    Get historical stock price data.
+
+    Args:
+        ticker: Stock ticker symbol (e.g., "AAPL")
+        period: Time period (1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max)
+
+    Returns:
+        dict with historical price data and performance metrics
+    """
+    return _get_stock_history(ticker, period)
+
+
+@tool
+def get_multiple_stocks_info(tickers: str) -> dict:
+    """
+    Get basic information for multiple stocks at once.
+
+    Args:
+        tickers: Comma-separated list of stock ticker symbols (e.g., "AAPL,MSFT,GOOGL")
+
+    Returns:
+        dict with information for each stock
+    """
+    ticker_list = [t.strip() for t in tickers.split(",")]
+    return _get_multiple_stocks_info(ticker_list)
+
+
+@tool
+def compare_stocks_performance(tickers: str, period: str = "1mo") -> dict:
+    """
+    Compare performance of multiple stocks over a given period.
+
+    Args:
+        tickers: Comma-separated list of stock ticker symbols (e.g., "AAPL,MSFT,GOOGL")
+        period: Time period for comparison (1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max)
+
+    Returns:
+        dict with performance comparison and rankings
+    """
+    ticker_list = [t.strip() for t in tickers.split(",")]
+    return _compare_stocks_performance(ticker_list, period)
+
+
+@tool
+def get_market_summary() -> dict:
+    """
+    Get summary of major market indices (S&P 500, Dow Jones, NASDAQ, etc.).
+
+    Returns:
+        dict with current values and changes for major market indices
+    """
+    return _get_market_summary()
+
+
 # Export tools for easy import
-__all__ = ['read_index', 'write_index', 'get_index_info']
+__all__ = ['read_index', 'write_index', 'get_index_info', 'get_stock_info', 'get_stock_history',
+           'get_multiple_stocks_info', 'compare_stocks_performance', 'get_market_summary']

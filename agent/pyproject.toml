@@ -9,6 +9,7 @@ dependencies = [
     "openai>=1.97.1",
     "strands-agents>=1.0.1",
     "strands-agents-tools>=0.2.1",
+    "yfinance>=0.2.65",
 ]
 
 [tool.black]
