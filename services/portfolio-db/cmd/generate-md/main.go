@@ -65,7 +65,7 @@ func generateMarkdown(holdings []db.PortfolioHolding) string {
 	
 	// Portfolio overview
 	sb.WriteString("## Portfolio Overview\n\n")
-	sb.WriteString("This index represents a balanced, diversified portfolio of 20 stocks, each weighted at exactly 5.0% for optimal risk distribution. ")
+	sb.WriteString("This index represents a conviction-weighted portfolio of high-quality stocks with dynamic allocation based on opportunity size, risk assessment, and market analysis. ")
 	sb.WriteString("Holdings are selected based on fundamental analysis, market performance, sector diversification, and growth potential.\n\n")
 	
 	// Holdings list
@@ -104,7 +104,7 @@ func generateMarkdown(holdings []db.PortfolioHolding) string {
 	sb.WriteString("- **Fundamental Analysis**: Financial health, competitive advantages, and growth prospects\n")
 	sb.WriteString("- **Market Intelligence**: Real-time price data and performance tracking\n")
 	sb.WriteString("- **Sector Diversification**: Balanced exposure across technology, healthcare, finance, consumer goods, and energy\n")
-	sb.WriteString("- **Risk Management**: Equal weighting (5% each) to prevent concentration risk\n\n")
+	sb.WriteString("- **Risk Management**: Dynamic weighting with concentration limits (max 15% per position) to balance conviction with diversification\n\n")
 	
 	sb.WriteString(fmt.Sprintf("*Generated automatically from portfolio database on %s*\n", time.Now().Format("2006-01-02 15:04:05")))
 	

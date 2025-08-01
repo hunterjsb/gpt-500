@@ -40,21 +40,37 @@ Analyze and decide:
 - Which stocks to keep (based on fundamentals, performance, outlook)
 - Which stocks to remove (poor performance, changed thesis)
 - Which new stocks to add (better opportunities, diversification)
-- Maintain exactly 20 stocks at 5.0% weight each
+- Maintain approximately 15-25 stocks with dynamic weighting based on conviction
+- Higher conviction stocks can receive larger allocations (up to 15% max per stock)
+- Lower conviction or speculative plays can receive smaller allocations (minimum 1%)
 
 ### Step 4: Update Portfolio Database
-Use `set_target_portfolio` with a complete list of 20 holdings:
+Use `set_target_portfolio` with your dynamically weighted portfolio:
 
 ```json
 [
   {
     "ticker": "MSFT", 
     "name": "Microsoft Corporation",
-    "weight": 5.0,
+    "weight": 12.5,
     "price": 533.57,
-    "comment": "Strong AI and cloud positioning with solid financials"
+    "comment": "Strong AI and cloud positioning - high conviction"
   },
-  // ... 19 more stocks at 5.0% each = 100% total
+  {
+    "ticker": "NVDA", 
+    "name": "NVIDIA Corporation",
+    "weight": 10.0,
+    "price": 177.87,
+    "comment": "AI leader but high volatility - strong conviction"
+  },
+  {
+    "ticker": "KO", 
+    "name": "The Coca-Cola Company",
+    "weight": 3.0,
+    "price": 67.89,
+    "comment": "Defensive play - lower conviction"
+  }
+  // ... more stocks with weights that sum to 100% total
 ]
 ```
 
@@ -66,17 +82,22 @@ Use `set_target_portfolio` with a complete list of 20 holdings:
 
 - **Database First**: You update the database, NOT the markdown file directly
 - **Atomic Updates**: Use `set_target_portfolio` for clean, precision-safe updates
-- **Perfect Weights**: Always ensure 20 stocks × 5.0% = 100.0% exactly
+- **Dynamic Weights**: Allocate based on conviction, risk, and opportunity size
+- **Concentration Limits**: Maximum 15% per stock, minimum 1% per stock
+- **Portfolio Size**: Target 15-25 holdings for optimal diversification vs. conviction balance
 - **Rich Comments**: Include meaningful analysis in the comment field
 - **Current Prices**: Use real market data from financial tools
 
 ## Success Criteria
 
 After completion:
-- Database contains exactly 20 holdings at 5.0% each
+- Database contains 15-25 holdings with dynamic, conviction-based weighting
+- High conviction positions receive larger allocations (8-15%)
+- Medium conviction positions receive moderate allocations (4-7%)  
+- Low conviction/defensive positions receive smaller allocations (1-3%)
 - All holdings have current market prices
-- Comments explain the investment thesis for each stock
-- Portfolio reflects your analysis of current market conditions
+- Comments explain the investment thesis and conviction level for each stock
+- Portfolio reflects your analysis of current market conditions and opportunities
 - Total weight equals exactly 100.000%
 
 The markdown file will be generated automatically from the database in a separate process.
