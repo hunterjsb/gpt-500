@@ -1,5 +1,4 @@
 import subprocess
-import os
 from strands import Agent
 from strands.models.openai import OpenAIModel
 from strands_tools import calculator, current_time
