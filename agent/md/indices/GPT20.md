@@ -1,69 +1,121 @@
-# GPT20 Index
+# GPT20 - AI-Curated Stock Index
 
-The GPT20 Index is a thoughtfully curated list of 20 stocks selected based on rigorous analysis of current market conditions, company fundamentals, sector trends, and other critical factors. This index aims to maximize financial outcomes by maintaining a diverse portfolio of high-potential stocks while reflecting ongoing shifts in the financial landscape.
+*An algorithmically-managed portfolio of 20 high-conviction stocks, maintained by GPT-4o with real-time market analysis.*
 
-1. **Microsoft Corporation (MSFT)**  
-   Strong financials and continued expansion into AI and cloud computing solutions make Microsoft a resilient choice.
+**Last Updated:** August 1, 2025 at 1:10 AM EST
 
-2. **Apple Inc. (AAPL)**  
-   Maintains a loyal customer base and robust ecosystem despite latest declines, requiring upcoming reevaluation.
+## Portfolio Overview
 
-3. **Amazon.com, Inc. (AMZN)**  
-   E-commerce leader with growing profitability in AWS and digital ad space, though experiencing recent dips.
+This index represents a balanced, diversified portfolio of 20 stocks, each weighted at exactly 5.0% for optimal risk distribution. Holdings are selected based on fundamental analysis, market performance, sector diversification, and growth potential.
 
-4. **Alphabet Inc. (GOOGL)**  
-   Diverse revenue streams from advertising to cloud services ensure stable growth, needing observation for improvement.
+## Current Holdings
 
-5. **Tesla, Inc. (TSLA)**  
-   Leading innovation in electric vehicles, slightly down but may warrant closer inspection soon.
+1. **Tesla, Inc. (TSLA)** - 5.000% 
+   *Current Price: $308.27*
+   
+   Leading role in electric vehicles and energy solutions.
 
-6. **NVIDIA Corporation (NVDA)**  
-   Best performer, enormous growth in AI and gaming industries positioning it for continued success.
+2. **NVIDIA Corporation (NVDA)** - 5.000% 
+   *Current Price: $177.87*
+   
+   Pioneer in AI and gaming sectors, driving strong growth.
 
-7. **ASML Holding N.V. (ASML)**  
-   Continues to be crucial in semiconductor market with positive recent performance.
+3. **ASML Holding N.V. (ASML)** - 5.000% 
+   *Current Price: $694.71*
+   
+   Semiconductor equipment giant critical to advanced manufacturing.
 
-8. **Johnson & Johnson (JNJ)**  
-   Excellent growth, solidly positioned in pharmaceuticals and healthcare.
+4. **Johnson & Johnson (JNJ)** - 5.000% 
+   *Current Price: $164.74*
+   
+   Solid pharmaceuticals, with dependable market penetration.
 
-9. **Visa Inc. (V)**  
-   Performance uplifted by digital and cross-border volumes despite recent small reductions.
+5. **Visa Inc. (V)** - 5.000% 
+   *Current Price: $345.47*
+   
+   Global leader in digital payments with expanding transaction volume.
 
-10. **Procter & Gamble Co. (PG)**  
-    Steady presence in consumer staples, slightly declining, persistence recommended.
+6. **The Procter & Gamble Company (PG)** - 5.000% 
+   *Current Price: $150.47*
+   
+   Steady consumer base in staples, continual brand loyalty.
 
-11. **Exxon Mobil Corporation (XOM)**  
-    Benefiting from high energy prices, remaining robust in portfolio.
+7. **Exxon Mobil Corporation (XOM)** - 5.000% 
+   *Current Price: $111.64*
+   
+   Robust energy sector presence, thriving on high prices.
 
-12. **JPMorgan Chase & Co. (JPM)**  
-    Notable growth, confirmed strong bank fundamentals.
+8. **JPMorgan Chase & Co. (JPM)** - 5.000% 
+   *Current Price: $296.24*
+   
+   Resilient banking fundamentals supporting sector growth.
 
-13. **Taiwan Semiconductor Manufacturing Company Limited (TSMC)**  
-    Continue monitoring, data lacks but pivotal semiconductor role intact.
+9. **N/A (TSMC)** - 5.000% 
+   
+   Monitor pivotal role in semiconductor production.
 
-14. **Coca-Cola Company (KO)**  
-    Shows strong recovery in beverages with growth beyond sodas.
+10. **The Coca-Cola Company (KO)** - 5.000% 
+   *Current Price: $67.89*
+   
+   Recovery in beverages, growth beyond traditional sodas.
 
-15. **Home Depot, Inc. (HD)**  
-    Experiencing some losses, should be watched for economic recovery correlation.
+11. **The Home Depot, Inc. (HD)** - 5.000% 
+   *Current Price: $367.51*
+   
+   Strong sector ties to consumer cyclical trends and housing growth.
 
-16. **Pfizer Inc. (PFE)**  
-    In decline, noteworthy for pharmaceutical strides, soon needs reevaluation.
+12. **Pfizer Inc. (PFE)** - 5.000% 
+   *Current Price: $23.29*
+   
+   Pharmaceutical leader needing potential strategic reevaluation.
 
-17. **PepsiCo, Inc. (PEP)**  
-    Showing negative returns, investment reconsideration suggested.
+13. **PepsiCo, Inc. (PEP)** - 5.000% 
+   *Current Price: $137.92*
+   
+   Growth in snacks and beverages, with brand diversification.
 
-18. **Berkshire Hathaway Inc. (BRK.B)**  
-    Await data update, continue with its diversified approach.
+14. **Microsoft Corporation (MSFT)** - 5.000% 
+   *Current Price: $533.50*
+   
+   Strong AI and cloud positioning with solid financials.
 
-19. **Danaher Corporation (DHR)**  
-    Declining trends, remains promising in life sciences needing further lookout.
+15. **Meta Platforms, Inc. (META)** - 5.000% 
+   *Current Price: $773.44*
+   
+   Elevating network and VR/AR technologies driving recent growth.
 
-20. **Adobe Inc. (ADBE)**  
-    Replacing UnitedHealth Group due to underperformance, well-performing in digital transformation space.
+16. **N/A (BRK.B)** - 5.000% 
+   
+   Monitor diversified holdings approach, awaiting performance data.
 
-**Last Updated: 2025-07-28T18:55:44.948556+00:00**
+17. **Danaher Corporation (DHR)** - 5.000% 
+   *Current Price: $197.16*
+   
+   Innovative healthcare solutions within life sciences sector.
 
-Recent Changes:
-- **UnitedHealth Group (UNH)** replaced with **Adobe Inc. (ADBE)** for better diversification.
-- Continued review pending for Tesla, Danaher, and Apple due to trends.
+18. **Adobe Inc. (ADBE)** - 5.000% 
+   *Current Price: $357.69*
+   
+   Digital transformation leader, with robust creative tools.
+
+19. **Amazon.com, Inc. (AMZN)** - 5.000% 
+   *Current Price: $234.11*
+   
+   E-commerce leader with continual AWS and digital space expansion.
+
+20. **Alphabet Inc. (GOOGL)** - 5.000% 
+   *Current Price: $191.90*
+   
+   Diverse advertising and cloud services guide stable enterprise growth.
+
+---
+
+## Methodology
+
+This index is maintained through:
+- **Fundamental Analysis**: Financial health, competitive advantages, and growth prospects
+- **Market Intelligence**: Real-time price data and performance tracking
+- **Sector Diversification**: Balanced exposure across technology, healthcare, finance, consumer goods, and energy
+- **Risk Management**: Equal weighting (5% each) to prevent concentration risk
+
+*Generated automatically from portfolio database on 2025-08-01 01:10:37*

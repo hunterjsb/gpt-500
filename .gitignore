@@ -18,3 +18,15 @@ __pycache__/
 # Editor settings
 .zed
 .ropeproject
+
+# Go build artifacts
+services/portfolio-db/portfolio-db
+services/portfolio-db/portfolio-db-server
+services/portfolio-db/generate-md
+
+# Go modules cache
+go.sum
+
+# Service logs
+services/portfolio-db/server.log
+services/portfolio-db/*.log

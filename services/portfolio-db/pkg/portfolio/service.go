@@ -282,3 +282,117 @@ func (s *Service) RebalanceHoldings(ctx context.Context, params mcp.RebalanceHol
 		Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Successfully rebalanced holdings:\n%s", resultJSON)}},
 	}, nil
 }
+
+func (s *Service) ResetPortfolio(ctx context.Context, params mcp.ResetPortfolioParams) (*mcp.Response, error) {
+	// Start a transaction to clear all holdings
+	tx, err := s.database.BeginTx(ctx, nil)
+	if err != nil {
+		return &mcp.Response{
+			Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Error starting transaction: %v", err)}},
+			IsError: true,
+		}, nil
+	}
+	defer tx.Rollback()
+
+	// Delete all holdings
+	_, err = tx.ExecContext(ctx, "DELETE FROM portfolio_holdings")
+	if err != nil {
+		return &mcp.Response{
+			Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Error clearing portfolio: %v", err)}},
+			IsError: true,
+		}, nil
+	}
+
+	// Commit the transaction
+	if err := tx.Commit(); err != nil {
+		return &mcp.Response{
+			Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Error committing transaction: %v", err)}},
+			IsError: true,
+		}, nil
+	}
+
+	return &mcp.Response{
+		Content: []mcp.Content{{Type: "text", Text: "Successfully reset portfolio - all holdings removed"}},
+	}, nil
+}
+
+func (s *Service) SetTargetPortfolio(ctx context.Context, params mcp.SetTargetPortfolioParams) (*mcp.Response, error) {
+	// Validate that weights sum to approximately 100%
+	var totalWeight float64
+	for _, holding := range params.Holdings {
+		totalWeight += holding.Weight
+	}
+
+	if totalWeight < 99.99 || totalWeight > 100.01 {
+		return &mcp.Response{
+			Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Target portfolio weights must sum to ~100%%, got %.3f%%", totalWeight)}},
+			IsError: true,
+		}, nil
+	}
+
+	// Start transaction to replace entire portfolio
+	tx, err := s.database.BeginTx(ctx, nil)
+	if err != nil {
+		return &mcp.Response{
+			Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Error starting transaction: %v", err)}},
+			IsError: true,
+		}, nil
+	}
+	defer tx.Rollback()
+
+	txQueries := s.queries.WithTx(tx)
+
+	// Step 1: Clear existing portfolio
+	_, err = tx.ExecContext(ctx, "DELETE FROM portfolio_holdings")
+	if err != nil {
+		return &mcp.Response{
+			Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Error clearing portfolio: %v", err)}},
+			IsError: true,
+		}, nil
+	}
+
+	// Step 2: Add all new holdings
+	var addedHoldings []db.PortfolioHolding
+	for _, holding := range params.Holdings {
+		var comment sql.NullString
+		if holding.Comment != nil {
+			comment = sql.NullString{String: *holding.Comment, Valid: true}
+		}
+
+		var returnVal sql.NullString
+		if holding.Return != nil {
+			returnVal = sql.NullString{String: fmt.Sprintf("%.4f", *holding.Return), Valid: true}
+		}
+
+		newHolding, err := txQueries.CreateHolding(ctx, db.CreateHoldingParams{
+			Ticker:  holding.Ticker,
+			Name:    holding.Name,
+			Weight:  fmt.Sprintf("%.3f", holding.Weight),
+			Comment: comment,
+			Price:   fmt.Sprintf("%.4f", holding.Price),
+			Return:  returnVal,
+		})
+
+		if err != nil {
+			return &mcp.Response{
+				Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Error adding %s: %v", holding.Ticker, err)}},
+				IsError: true,
+			}, nil
+		}
+
+		addedHoldings = append(addedHoldings, newHolding)
+	}
+
+	// Commit the transaction
+	if err := tx.Commit(); err != nil {
+		return &mcp.Response{
+			Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Error committing transaction: %v", err)}},
+			IsError: true,
+		}, nil
+	}
+
+	resultJSON, _ := json.MarshalIndent(addedHoldings, "", "  ")
+	return &mcp.Response{
+		Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Successfully set target portfolio with %d holdings:\n%s", len(addedHoldings), resultJSON)}},
+	}, nil
+}

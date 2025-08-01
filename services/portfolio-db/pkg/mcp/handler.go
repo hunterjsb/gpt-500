@@ -14,6 +14,8 @@ type PortfolioService interface {
 	DeleteHolding(ctx context.Context, params DeleteHoldingParams) (*Response, error)
 	GetPortfolioSummary(ctx context.Context, params GetPortfolioSummaryParams) (*Response, error)
 	RebalanceHoldings(ctx context.Context, params RebalanceHoldingsParams) (*Response, error)
+	ResetPortfolio(ctx context.Context, params ResetPortfolioParams) (*Response, error)
+	SetTargetPortfolio(ctx context.Context, params SetTargetPortfolioParams) (*Response, error)
 }
 
 type Handler struct {
@@ -80,6 +82,20 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			json.Unmarshal(paramsBytes, &params)
 		}
 		response, err = h.portfolioService.RebalanceHoldings(ctx, params)
+
+	case "reset_portfolio":
+		var params ResetPortfolioParams
+		if paramsBytes, marshalErr := json.Marshal(req.Params); marshalErr == nil {
+			json.Unmarshal(paramsBytes, &params)
+		}
+		response, err = h.portfolioService.ResetPortfolio(ctx, params)
+
+	case "set_target_portfolio":
+		var params SetTargetPortfolioParams
+		if paramsBytes, marshalErr := json.Marshal(req.Params); marshalErr == nil {
+			json.Unmarshal(paramsBytes, &params)
+		}
+		response, err = h.portfolioService.SetTargetPortfolio(ctx, params)
 
 	default:
 		response = &Response{

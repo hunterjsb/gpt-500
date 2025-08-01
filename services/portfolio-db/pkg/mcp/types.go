@@ -49,3 +49,20 @@ type RebalanceHoldingsParams struct {
 		Weight float64 `json:"weight"`
 	} `json:"holdings"`
 }
+
+type ResetPortfolioParams struct {
+	Confirm bool `json:"confirm"`
+}
+
+type TargetHolding struct {
+	Ticker  string   `json:"ticker"`
+	Name    string   `json:"name"`
+	Weight  float64  `json:"weight"`
+	Price   float64  `json:"price"`
+	Comment *string  `json:"comment,omitempty"`
+	Return  *float64 `json:"return,omitempty"`
+}
+
+type SetTargetPortfolioParams struct {
+	Holdings []TargetHolding `json:"holdings"`
+}
