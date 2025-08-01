@@ -16,20 +16,14 @@ def _call_mcp_tool(method: str, params: Dict[str, Any]) -> Dict[str, Any]:
         Response from the MCP server
     """
     url = "http://localhost:8080/mcp"
-    payload = {
-        "method": method,
-        "params": params
-    }
+    payload = {"method": method, "params": params}
 
     try:
         response = requests.post(url, json=payload, timeout=30)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
-        return {
-            "content": [{"type": "text", "text": f"Error calling MCP server: {e}"}],
-            "isError": True
-        }
+        return {"content": [{"type": "text", "text": f"Error calling MCP server: {e}"}], "isError": True}
 
 
 def get_portfolio_holdings() -> Dict[str, Any]:
@@ -42,8 +36,14 @@ def get_portfolio_holdings() -> Dict[str, Any]:
     return _call_mcp_tool("get_holdings", {})
 
 
-def add_portfolio_holding(ticker: str, name: str, weight: float, price: float,
-                         comment: Optional[str] = None, return_pct: Optional[float] = None) -> Dict[str, Any]:
+def add_portfolio_holding(
+    ticker: str,
+    name: str,
+    weight: float,
+    price: float,
+    comment: Optional[str] = None,
+    return_pct: Optional[float] = None,
+) -> Dict[str, Any]:
     """
     Add a new holding to the portfolio with automatic rebalancing.
 
@@ -58,12 +58,7 @@ def add_portfolio_holding(ticker: str, name: str, weight: float, price: float,
     Returns:
         dict with operation result
     """
-    params = {
-        "ticker": ticker,
-        "name": name,
-        "weight": weight,
-        "price": price
-    }
+    params = {"ticker": ticker, "name": name, "weight": weight, "price": price}
 
     if comment:
         params["comment"] = comment
@@ -73,9 +68,14 @@ def add_portfolio_holding(ticker: str, name: str, weight: float, price: float,
     return _call_mcp_tool("add_holding", params)
 
 
-def update_portfolio_holding(ticker: str, name: Optional[str] = None, weight: Optional[float] = None,
-                           price: Optional[float] = None, comment: Optional[str] = None,
-                           return_pct: Optional[float] = None) -> Dict[str, Any]:
+def update_portfolio_holding(
+    ticker: str,
+    name: Optional[str] = None,
+    weight: Optional[float] = None,
+    price: Optional[float] = None,
+    comment: Optional[str] = None,
+    return_pct: Optional[float] = None,
+) -> Dict[str, Any]:
     """
     Update an existing portfolio holding.
 

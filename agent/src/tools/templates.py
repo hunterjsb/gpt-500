@@ -9,8 +9,8 @@ class TemplateLoader:
         self.templates_dir = templates_dir or Path(__file__).parent.parent.parent / "md" / "prompts"
 
     def load_template(self, template_name):
-        if not template_name.endswith('.md'):
-            template_name += '.md'
+        if not template_name.endswith(".md"):
+            template_name += ".md"
         template_path = self.templates_dir / template_name
         return template_path.read_text(encoding="utf-8")
 
@@ -27,8 +27,8 @@ format_template = _loader.format_template
 
 
 def _get_index_path(index_name):
-    if not index_name.endswith('.md'):
-        index_name += '.md'
+    if not index_name.endswith(".md"):
+        index_name += ".md"
     return Path(__file__).parent.parent.parent / "md" / "indices" / index_name
 
 

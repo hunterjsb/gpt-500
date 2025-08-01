@@ -12,7 +12,7 @@ from .financial_data import (
     get_stock_history as _get_stock_history,
     get_multiple_stocks_info as _get_multiple_stocks_info,
     compare_stocks_performance as _compare_stocks_performance,
-    get_market_summary as _get_market_summary
+    get_market_summary as _get_market_summary,
 )
 from .portfolio_db import (
     get_portfolio_holdings as _get_portfolio_holdings,
@@ -21,7 +21,7 @@ from .portfolio_db import (
     delete_portfolio_holding as _delete_portfolio_holding,
     get_portfolio_summary as _get_portfolio_summary,
     reset_portfolio as _reset_portfolio,
-    set_target_portfolio as _set_target_portfolio
+    set_target_portfolio as _set_target_portfolio,
 )
 
 
@@ -40,7 +40,9 @@ def read_index(index_name: str) -> dict:
     return {
         "content": content,
         "exists": exists,
-        "message": f"Successfully read index file '{index_name}'" if exists else f"Index file '{index_name}' does not exist"
+        "message": (
+            f"Successfully read index file '{index_name}'" if exists else f"Index file '{index_name}' does not exist"
+        ),
     }
 
 
@@ -60,7 +62,7 @@ def write_index(index_name: str, content: str) -> dict:
     return {
         "success": True,
         "file_path": str(file_path),
-        "message": f"Successfully wrote {len(content)} characters to {file_path}"
+        "message": f"Successfully wrote {len(content)} characters to {file_path}",
     }
 
 
@@ -85,14 +87,10 @@ def get_index_info(index_name: str) -> dict:
             "size_bytes": index_path.stat().st_size,
             "content_length": len(content),
             "line_count": len(content.splitlines()),
-            "message": f"Index file '{index_name}' exists with {len(content)} characters"
+            "message": f"Index file '{index_name}' exists with {len(content)} characters",
         }
     else:
-        return {
-            "exists": False,
-            "path": str(index_path),
-            "message": f"Index file '{index_name}' does not exist"
-        }
+        return {"exists": False, "path": str(index_path), "message": f"Index file '{index_name}' does not exist"}
 
 
 @tool
@@ -178,8 +176,7 @@ def get_portfolio_holdings() -> dict:
 
 
 @tool
-def add_portfolio_holding(ticker: str, name: str, weight: float, price: float,
-                         comment: Optional[str] = None) -> dict:
+def add_portfolio_holding(ticker: str, name: str, weight: float, price: float, comment: Optional[str] = None) -> dict:
     """
     Add a new holding to the portfolio with automatic rebalancing.
 
@@ -199,8 +196,13 @@ def add_portfolio_holding(ticker: str, name: str, weight: float, price: float,
 
 
 @tool
-def update_portfolio_holding(ticker: str, name: Optional[str] = None, weight: Optional[float] = None,
-                           price: Optional[float] = None, comment: Optional[str] = None) -> dict:
+def update_portfolio_holding(
+    ticker: str,
+    name: Optional[str] = None,
+    weight: Optional[float] = None,
+    price: Optional[float] = None,
+    comment: Optional[str] = None,
+) -> dict:
     """
     Update an existing portfolio holding.
 
@@ -277,13 +279,26 @@ def set_target_portfolio(holdings: str) -> dict:
         holdings = '[{"ticker": "AAPL", "name": "Apple Inc.", "weight": 5.0, "price": 150.0}, {"ticker": "MSFT", "name": "Microsoft Corp.", "weight": 5.0, "price": 300.0}]'
     """
     import json
+
     holdings_list = json.loads(holdings)
     return _set_target_portfolio(holdings_list)
 
 
 # Export tools for easy import
-__all__ = ['read_index', 'write_index', 'get_index_info', 'get_stock_info', 'get_stock_history',
-           'get_multiple_stocks_info', 'compare_stocks_performance', 'get_market_summary',
-           'get_portfolio_holdings', 'add_portfolio_holding', 'update_portfolio_holding',
-           'delete_portfolio_holding', 'get_portfolio_summary', 'rebalance_portfolio_holdings',
-           'reset_portfolio', 'set_target_portfolio']
+__all__ = [
+    "read_index",
+    "write_index",
+    "get_index_info",
+    "get_stock_info",
+    "get_stock_history",
+    "get_multiple_stocks_info",
+    "compare_stocks_performance",
+    "get_market_summary",
+    "get_portfolio_holdings",
+    "add_portfolio_holding",
+    "update_portfolio_holding",
+    "delete_portfolio_holding",
+    "get_portfolio_summary",
+    "reset_portfolio",
+    "set_target_portfolio",
+]

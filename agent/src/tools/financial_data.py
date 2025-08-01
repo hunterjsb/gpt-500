@@ -33,7 +33,7 @@ def get_stock_info(ticker: str) -> Dict:
             "52_week_low": info.get("fiftyTwoWeekLow"),
             "sector": info.get("sector"),
             "industry": info.get("industry"),
-            "success": True
+            "success": True,
         }
 
         # Calculate price change
@@ -50,7 +50,7 @@ def get_stock_info(ticker: str) -> Dict:
             "ticker": ticker.upper(),
             "success": False,
             "error": str(e),
-            "message": f"Failed to get stock info for {ticker.upper()}: {str(e)}"
+            "message": f"Failed to get stock info for {ticker.upper()}: {str(e)}",
         }
 
 
@@ -74,20 +74,22 @@ def get_stock_history(ticker: str, period: str = "1mo") -> Dict:
                 "ticker": ticker.upper(),
                 "success": False,
                 "error": "No historical data found",
-                "message": f"No historical data available for {ticker.upper()}"
+                "message": f"No historical data available for {ticker.upper()}",
             }
 
         # Convert to simple format
         history_data = []
         for date, row in hist.iterrows():
-            history_data.append({
-                "date": str(date)[:10],
-                "open": round(float(row["Open"]), 2),
-                "high": round(float(row["High"]), 2),
-                "low": round(float(row["Low"]), 2),
-                "close": round(float(row["Close"]), 2),
-                "volume": int(row["Volume"])
-            })
+            history_data.append(
+                {
+                    "date": str(date)[:10],
+                    "open": round(float(row["Open"]), 2),
+                    "high": round(float(row["High"]), 2),
+                    "low": round(float(row["Low"]), 2),
+                    "close": round(float(row["Close"]), 2),
+                    "volume": int(row["Volume"]),
+                }
+            )
 
         # Calculate performance metrics
         first_close = hist["Close"].iloc[0]
@@ -102,7 +104,7 @@ def get_stock_history(ticker: str, period: str = "1mo") -> Dict:
             "total_return_pct": round(total_return, 2),
             "first_price": round(first_close, 2),
             "last_price": round(last_close, 2),
-            "success": True
+            "success": True,
         }
 
     except Exception as e:
@@ -110,7 +112,7 @@ def get_stock_history(ticker: str, period: str = "1mo") -> Dict:
             "ticker": ticker.upper(),
             "success": False,
             "error": str(e),
-            "message": f"Failed to get historical data for {ticker.upper()}: {str(e)}"
+            "message": f"Failed to get historical data for {ticker.upper()}: {str(e)}",
         }
 
 
@@ -139,7 +141,7 @@ def get_multiple_stocks_info(tickers: List[str]) -> Dict:
         "failed_count": len(failed_tickers),
         "failed_tickers": failed_tickers,
         "stocks": results,
-        "success": len(results) > 0
+        "success": len(results) > 0,
     }
 
 
@@ -160,12 +162,14 @@ def compare_stocks_performance(tickers: List[str], period: str = "1mo") -> Dict:
         for ticker in tickers:
             hist_data = get_stock_history(ticker, period)
             if hist_data["success"]:
-                performance_data.append({
-                    "ticker": ticker.upper(),
-                    "return_pct": hist_data["total_return_pct"],
-                    "current_price": hist_data["last_price"],
-                    "start_price": hist_data["first_price"]
-                })
+                performance_data.append(
+                    {
+                        "ticker": ticker.upper(),
+                        "return_pct": hist_data["total_return_pct"],
+                        "current_price": hist_data["last_price"],
+                        "start_price": hist_data["first_price"],
+                    }
+                )
 
         # Sort by performance
         performance_data.sort(key=lambda x: x["return_pct"], reverse=True)
@@ -176,15 +180,11 @@ def compare_stocks_performance(tickers: List[str], period: str = "1mo") -> Dict:
             "performance_ranking": performance_data,
             "best_performer": performance_data[0] if performance_data else None,
             "worst_performer": performance_data[-1] if performance_data else None,
-            "success": len(performance_data) > 0
+            "success": len(performance_data) > 0,
         }
 
     except Exception as e:
-        return {
-            "success": False,
-            "error": str(e),
-            "message": f"Failed to compare stock performance: {str(e)}"
-        }
+        return {"success": False, "error": str(e), "message": f"Failed to compare stock performance: {str(e)}"}
 
 
 def get_market_summary() -> Dict:
@@ -194,13 +194,7 @@ def get_market_summary() -> Dict:
     Returns:
         dict with market indices information
     """
-    indices = {
-        "S&P 500": "^GSPC",
-        "Dow Jones": "^DJI",
-        "NASDAQ": "^IXIC",
-        "Russell 2000": "^RUT",
-        "VIX": "^VIX"
-    }
+    indices = {"S&P 500": "^GSPC", "Dow Jones": "^DJI", "NASDAQ": "^IXIC", "Russell 2000": "^RUT", "VIX": "^VIX"}
 
     market_data = {}
 
@@ -219,21 +213,13 @@ def get_market_summary() -> Dict:
                     "current_value": round(current, 2),
                     "previous_close": round(previous, 2),
                     "change_pct": round(change_pct, 2),
-                    "success": True
+                    "success": True,
                 }
             else:
-                market_data[name] = {
-                    "ticker": ticker,
-                    "success": False,
-                    "error": "Insufficient data"
-                }
+                market_data[name] = {"ticker": ticker, "success": False, "error": "Insufficient data"}
 
         except Exception as e:
-            market_data[name] = {
-                "ticker": ticker,
-                "success": False,
-                "error": str(e)
-            }
+            market_data[name] = {"ticker": ticker, "success": False, "error": str(e)}
 
     successful_indices = sum(1 for data in market_data.values() if data.get("success"))
 
@@ -242,5 +228,5 @@ def get_market_summary() -> Dict:
         "indices": market_data,
         "successful_count": successful_indices,
         "total_count": len(indices),
-        "success": successful_indices > 0
+        "success": successful_indices > 0,
     }
