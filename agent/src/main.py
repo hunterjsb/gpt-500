@@ -1,5 +1,3 @@
-import subprocess
-import requests
 from strands import Agent
 from strands.models.openai import OpenAIModel
 from strands.tools.mcp import MCPClient
@@ -18,39 +16,30 @@ from .tools import (
     compare_stocks_performance,
     get_market_summary,
 )
+from .cli import (
+    select_system_prompt,
+    test_portfolio_db_connection,
+    generate_markdown_from_database,
+)
+from .config import (
+    CONNECTING_MCP_MSG,
+    MCP_SUCCESS_MSG,
+    MCP_ERROR_MSG,
+    MCP_HELP_MSG,
+    MIGRATION_PROMPT,
+)
 
 
 def main():
     # Allow user to select system prompt
-    print("Available system prompts:")
-    print("1. SYSTEM - Standard GPT20 index management")
-    print("2. MIGRATION - Migrate GPT20.md to database")
-
-    choice = input("Select prompt (1 or 2): ").strip()
-
-    if choice == "2":
-        system_prompt_name = "MIGRATION"
-        user_prompt_name = None  # Migration prompt is self-contained
-        print("Using MIGRATION system prompt...")
-    else:
-        system_prompt_name = "SYSTEM"
-        user_prompt_name = "UPDATE"
-        print("Using SYSTEM prompt with UPDATE...")
+    system_prompt_name, user_prompt_name = select_system_prompt()
 
     # Test portfolio-db server connection
-    print("Testing portfolio-db server connection...")
-    try:
-        response = requests.get("http://localhost:8080/health", timeout=5)
-        response.raise_for_status()
-        print("✅ Portfolio-db server is running")
-    except requests.exceptions.RequestException as e:
-        print(f"❌ Failed to connect to portfolio-db server: {e}")
-        print("Make sure the portfolio-db server is running on localhost:8080")
-        print("You can start it with: cd services/portfolio-db && ./start_server.sh")
+    if not test_portfolio_db_connection():
         return
 
     # Connect to the MCP server and get portfolio tools
-    print("Connecting to portfolio-db MCP server...")
+    print(CONNECTING_MCP_MSG)
     try:
         mcp_client = MCPClient(
             lambda: streamablehttp_client("http://localhost:8080/mcp")
@@ -59,7 +48,7 @@ def main():
         with mcp_client:
             # Get portfolio tools from MCP server
             portfolio_tools = mcp_client.list_tools_sync()
-            print(f"✅ Loaded {len(portfolio_tools)} portfolio tools from MCP server")
+            print(MCP_SUCCESS_MSG.format(len(portfolio_tools)))
 
             # Combine local tools with MCP portfolio tools
             local_tools = [
@@ -90,50 +79,17 @@ def main():
 
                 # After UPDATE completes, automatically generate GPT20.md from database
                 if system_prompt_name == "SYSTEM":
-                    print("\n🚀 Generating GPT20.md from updated database...")
-                    try:
-                        # Path to the portfolio-db service
-                        portfolio_db_path = "/home/hunter/Desktop/claude-20/services/portfolio-db"
-                        result = subprocess.run(
-                            ["./generate-md"], cwd=portfolio_db_path, capture_output=True, text=True, timeout=30
-                        )
-
-                        if result.returncode == 0:
-                            print("✅ GPT20.md successfully generated!")
-                            print(result.stdout.strip())
-                        else:
-                            print(f"❌ Error generating markdown: {result.stderr}")
-
-                    except subprocess.TimeoutExpired:
-                        print("❌ Timeout: Markdown generation took too long")
-                    except Exception as e:
-                        print(f"❌ Failed to generate markdown: {e}")
+                    generate_markdown_from_database()
             else:
                 # Migration mode - let agent run with system prompt
-                agent("Begin the migration process by reading the GPT20.md file and migrating the data to the database.")
+                agent(MIGRATION_PROMPT)
 
                 # After MIGRATION completes, also generate GPT20.md
-                print("\n🚀 Generating GPT20.md from migrated database...")
-                try:
-                    portfolio_db_path = "/home/hunter/Desktop/claude-20/services/portfolio-db"
-                    result = subprocess.run(
-                        ["./generate-md"], cwd=portfolio_db_path, capture_output=True, text=True, timeout=30
-                    )
-
-                    if result.returncode == 0:
-                        print("✅ GPT20.md successfully generated!")
-                        print(result.stdout.strip())
-                    else:
-                        print(f"❌ Error generating markdown: {result.stderr}")
-
-                except subprocess.TimeoutExpired:
-                    print("❌ Timeout: Markdown generation took too long")
-                except Exception as e:
-                    print(f"❌ Failed to generate markdown: {e}")
+                generate_markdown_from_database()
 
     except Exception as e:
-        print(f"❌ Failed to connect to MCP server: {e}")
-        print("Make sure the portfolio-db server is running and properly configured for MCP")
+        print(MCP_ERROR_MSG.format(e))
+        print(MCP_HELP_MSG)
         return
 
 
