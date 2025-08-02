@@ -2,9 +2,11 @@
 
 import yfinance as yf
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict
+from strands.tools.decorator import tool
 
 
+@tool
 def get_stock_info(ticker: str) -> Dict:
     """
     Get basic stock information and current price.
@@ -54,6 +56,7 @@ def get_stock_info(ticker: str) -> Dict:
         }
 
 
+@tool
 def get_stock_history(ticker: str, period: str = "1mo") -> Dict:
     """
     Get historical stock price data.
@@ -116,20 +119,22 @@ def get_stock_history(ticker: str, period: str = "1mo") -> Dict:
         }
 
 
-def get_multiple_stocks_info(tickers: List[str]) -> Dict:
+@tool
+def get_multiple_stocks_info(tickers: str) -> Dict:
     """
     Get basic information for multiple stocks at once.
 
     Args:
-        tickers: List of stock ticker symbols
+        tickers: Comma-separated list of stock ticker symbols (e.g., "AAPL,MSFT,GOOGL")
 
     Returns:
         dict with information for each stock
     """
+    ticker_list = [t.strip() for t in tickers.split(",")]
     results = {}
     failed_tickers = []
 
-    for ticker in tickers:
+    for ticker in ticker_list:
         stock_info = get_stock_info(ticker)
         if stock_info["success"]:
             results[ticker.upper()] = stock_info
@@ -145,21 +150,23 @@ def get_multiple_stocks_info(tickers: List[str]) -> Dict:
     }
 
 
-def compare_stocks_performance(tickers: List[str], period: str = "1mo") -> Dict:
+@tool
+def compare_stocks_performance(tickers: str, period: str = "1mo") -> Dict:
     """
     Compare performance of multiple stocks over a given period.
 
     Args:
-        tickers: List of stock ticker symbols
-        period: Time period for comparison
+        tickers: Comma-separated list of stock ticker symbols (e.g., "AAPL,MSFT,GOOGL")
+        period: Time period for comparison (1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max)
 
     Returns:
         dict with performance comparison
     """
     try:
+        ticker_list = [t.strip() for t in tickers.split(",")]
         performance_data = []
 
-        for ticker in tickers:
+        for ticker in ticker_list:
             hist_data = get_stock_history(ticker, period)
             if hist_data["success"]:
                 performance_data.append(
@@ -187,6 +194,7 @@ def compare_stocks_performance(tickers: List[str], period: str = "1mo") -> Dict:
         return {"success": False, "error": str(e), "message": f"Failed to compare stock performance: {str(e)}"}
 
 
+@tool
 def get_market_summary() -> Dict:
     """
     Get summary of major market indices.

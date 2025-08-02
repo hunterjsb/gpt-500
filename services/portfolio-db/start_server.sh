@@ -18,6 +18,15 @@ sleep 2
 # Check if it's running
 if pgrep -f portfolio-db > /dev/null; then
     echo "Server started successfully (PID: $(pgrep -f portfolio-db))"
+
+    # Hit the health check endpoint
+    echo "Checking health endpoint..."
+    if curl -f -s http://localhost:8080/health > /dev/null; then
+        echo "Health check passed - server is ready!"
+    else
+        echo "Health check failed - server may not be ready"
+        exit 1
+    fi
 else
     echo "Failed to start server"
     exit 1

@@ -23,27 +23,27 @@ func NewService(database *sql.DB, queries *db.Queries) *Service {
 	}
 }
 
-func (s *Service) GetHoldings(ctx context.Context, params mcp.GetHoldingsParams) (*mcp.Response, error) {
+func (s *Service) GetHoldings(ctx context.Context, params mcp.GetHoldingsParams) (*mcp.MCPToolCallResponse, error) {
 	holdings, err := s.queries.GetAllHoldings(ctx)
 	if err != nil {
-		return &mcp.Response{
-			Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Error querying holdings: %v", err)}},
+		return &mcp.MCPToolCallResponse{
+			Content: []mcp.MCPContent{{Type: "text", Text: fmt.Sprintf("Error querying holdings: %v", err)}},
 			IsError: true,
 		}, nil
 	}
 
 	holdingsJSON, _ := json.MarshalIndent(holdings, "", "  ")
-	return &mcp.Response{
-		Content: []mcp.Content{{Type: "text", Text: string(holdingsJSON)}},
+	return &mcp.MCPToolCallResponse{
+		Content: []mcp.MCPContent{{Type: "text", Text: string(holdingsJSON)}},
 	}, nil
 }
 
-func (s *Service) AddHolding(ctx context.Context, params mcp.AddHoldingParams) (*mcp.Response, error) {
+func (s *Service) AddHolding(ctx context.Context, params mcp.AddHoldingParams) (*mcp.MCPToolCallResponse, error) {
 	// Start transaction for smart rebalancing
 	tx, err := s.database.BeginTx(ctx, nil)
 	if err != nil {
-		return &mcp.Response{
-			Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Error starting transaction: %v", err)}},
+		return &mcp.MCPToolCallResponse{
+			Content: []mcp.MCPContent{{Type: "text", Text: fmt.Sprintf("Error starting transaction: %v", err)}},
 			IsError: true,
 		}, nil
 	}
@@ -54,8 +54,8 @@ func (s *Service) AddHolding(ctx context.Context, params mcp.AddHoldingParams) (
 	// Get current holdings to calculate rebalancing
 	currentHoldings, err := txQueries.GetAllHoldings(ctx)
 	if err != nil {
-		return &mcp.Response{
-			Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Error getting current holdings: %v", err)}},
+		return &mcp.MCPToolCallResponse{
+			Content: []mcp.MCPContent{{Type: "text", Text: fmt.Sprintf("Error getting current holdings: %v", err)}},
 			IsError: true,
 		}, nil
 	}
@@ -89,8 +89,8 @@ func (s *Service) AddHolding(ctx context.Context, params mcp.AddHoldingParams) (
 			})
 
 			if err != nil {
-				return &mcp.Response{
-					Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Error rebalancing %s: %v", holding.Ticker, err)}},
+				return &mcp.MCPToolCallResponse{
+					Content: []mcp.MCPContent{{Type: "text", Text: fmt.Sprintf("Error rebalancing %s: %v", holding.Ticker, err)}},
 					IsError: true,
 				}, nil
 			}
@@ -118,16 +118,16 @@ func (s *Service) AddHolding(ctx context.Context, params mcp.AddHoldingParams) (
 	})
 
 	if err != nil {
-		return &mcp.Response{
-			Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Error adding new holding: %v", err)}},
+		return &mcp.MCPToolCallResponse{
+			Content: []mcp.MCPContent{{Type: "text", Text: fmt.Sprintf("Error adding new holding: %v", err)}},
 			IsError: true,
 		}, nil
 	}
 
 	// Commit the transaction
 	if err := tx.Commit(); err != nil {
-		return &mcp.Response{
-			Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Error committing transaction: %v", err)}},
+		return &mcp.MCPToolCallResponse{
+			Content: []mcp.MCPContent{{Type: "text", Text: fmt.Sprintf("Error committing transaction: %v", err)}},
 			IsError: true,
 		}, nil
 	}
@@ -136,17 +136,17 @@ func (s *Service) AddHolding(ctx context.Context, params mcp.AddHoldingParams) (
 	finalHoldings, _ := s.queries.GetAllHoldings(ctx)
 	finalJSON, _ := json.MarshalIndent(finalHoldings, "", "  ")
 
-	return &mcp.Response{
-		Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Successfully added %s with automatic rebalancing:\n%s", params.Ticker, finalJSON)}},
+	return &mcp.MCPToolCallResponse{
+		Content: []mcp.MCPContent{{Type: "text", Text: fmt.Sprintf("Successfully added %s with automatic rebalancing:\n%s", params.Ticker, finalJSON)}},
 	}, nil
 }
 
-func (s *Service) UpdateHolding(ctx context.Context, params mcp.UpdateHoldingParams) (*mcp.Response, error) {
+func (s *Service) UpdateHolding(ctx context.Context, params mcp.UpdateHoldingParams) (*mcp.MCPToolCallResponse, error) {
 	// First get the current holding to use as defaults
 	current, err := s.queries.GetHolding(ctx, params.Ticker)
 	if err != nil {
-		return &mcp.Response{
-			Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Holding not found: %v", err)}},
+		return &mcp.MCPToolCallResponse{
+			Content: []mcp.MCPContent{{Type: "text", Text: fmt.Sprintf("Holding not found: %v", err)}},
 			IsError: true,
 		}, nil
 	}
@@ -184,53 +184,53 @@ func (s *Service) UpdateHolding(ctx context.Context, params mcp.UpdateHoldingPar
 	})
 
 	if err != nil {
-		return &mcp.Response{
-			Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Error updating holding: %v", err)}},
+		return &mcp.MCPToolCallResponse{
+			Content: []mcp.MCPContent{{Type: "text", Text: fmt.Sprintf("Error updating holding: %v", err)}},
 			IsError: true,
 		}, nil
 	}
 
 	holdingJSON, _ := json.MarshalIndent(holding, "", "  ")
-	return &mcp.Response{
-		Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Successfully updated %s:\n%s", params.Ticker, holdingJSON)}},
+	return &mcp.MCPToolCallResponse{
+		Content: []mcp.MCPContent{{Type: "text", Text: fmt.Sprintf("Successfully updated %s:\n%s", params.Ticker, holdingJSON)}},
 	}, nil
 }
 
-func (s *Service) DeleteHolding(ctx context.Context, params mcp.DeleteHoldingParams) (*mcp.Response, error) {
+func (s *Service) DeleteHolding(ctx context.Context, params mcp.DeleteHoldingParams) (*mcp.MCPToolCallResponse, error) {
 	err := s.queries.DeleteHolding(ctx, params.Ticker)
 	if err != nil {
-		return &mcp.Response{
-			Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Error deleting holding: %v", err)}},
+		return &mcp.MCPToolCallResponse{
+			Content: []mcp.MCPContent{{Type: "text", Text: fmt.Sprintf("Error deleting holding: %v", err)}},
 			IsError: true,
 		}, nil
 	}
 
-	return &mcp.Response{
-		Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Successfully deleted %s from portfolio", params.Ticker)}},
+	return &mcp.MCPToolCallResponse{
+		Content: []mcp.MCPContent{{Type: "text", Text: fmt.Sprintf("Successfully deleted %s from portfolio", params.Ticker)}},
 	}, nil
 }
 
-func (s *Service) GetPortfolioSummary(ctx context.Context, params mcp.GetPortfolioSummaryParams) (*mcp.Response, error) {
+func (s *Service) GetPortfolioSummary(ctx context.Context, params mcp.GetPortfolioSummaryParams) (*mcp.MCPToolCallResponse, error) {
 	summary, err := s.queries.GetPortfolioSummary(ctx)
 	if err != nil {
-		return &mcp.Response{
-			Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Error getting portfolio summary: %v", err)}},
+		return &mcp.MCPToolCallResponse{
+			Content: []mcp.MCPContent{{Type: "text", Text: fmt.Sprintf("Error getting portfolio summary: %v", err)}},
 			IsError: true,
 		}, nil
 	}
 
 	summaryJSON, _ := json.MarshalIndent(summary, "", "  ")
-	return &mcp.Response{
-		Content: []mcp.Content{{Type: "text", Text: string(summaryJSON)}},
+	return &mcp.MCPToolCallResponse{
+		Content: []mcp.MCPContent{{Type: "text", Text: string(summaryJSON)}},
 	}, nil
 }
 
-func (s *Service) RebalanceHoldings(ctx context.Context, params mcp.RebalanceHoldingsParams) (*mcp.Response, error) {
+func (s *Service) RebalanceHoldings(ctx context.Context, params mcp.RebalanceHoldingsParams) (*mcp.MCPToolCallResponse, error) {
 	// Start a transaction
 	tx, err := s.database.BeginTx(ctx, nil)
 	if err != nil {
-		return &mcp.Response{
-			Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Error starting transaction: %v", err)}},
+		return &mcp.MCPToolCallResponse{
+			Content: []mcp.MCPContent{{Type: "text", Text: fmt.Sprintf("Error starting transaction: %v", err)}},
 			IsError: true,
 		}, nil
 	}
@@ -244,8 +244,8 @@ func (s *Service) RebalanceHoldings(ctx context.Context, params mcp.RebalanceHol
 		// Get current holding to preserve other fields
 		current, err := txQueries.GetHolding(ctx, holding.Ticker)
 		if err != nil {
-			return &mcp.Response{
-				Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Holding %s not found: %v", holding.Ticker, err)}},
+			return &mcp.MCPToolCallResponse{
+				Content: []mcp.MCPContent{{Type: "text", Text: fmt.Sprintf("Holding %s not found: %v", holding.Ticker, err)}},
 				IsError: true,
 			}, nil
 		}
@@ -260,8 +260,8 @@ func (s *Service) RebalanceHoldings(ctx context.Context, params mcp.RebalanceHol
 		})
 
 		if err != nil {
-			return &mcp.Response{
-				Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Error updating %s: %v", holding.Ticker, err)}},
+			return &mcp.MCPToolCallResponse{
+				Content: []mcp.MCPContent{{Type: "text", Text: fmt.Sprintf("Error updating %s: %v", holding.Ticker, err)}},
 				IsError: true,
 			}, nil
 		}
@@ -271,24 +271,24 @@ func (s *Service) RebalanceHoldings(ctx context.Context, params mcp.RebalanceHol
 
 	// Commit the transaction
 	if err := tx.Commit(); err != nil {
-		return &mcp.Response{
-			Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Error committing transaction: %v", err)}},
+		return &mcp.MCPToolCallResponse{
+			Content: []mcp.MCPContent{{Type: "text", Text: fmt.Sprintf("Error committing transaction: %v", err)}},
 			IsError: true,
 		}, nil
 	}
 
 	resultJSON, _ := json.MarshalIndent(updatedHoldings, "", "  ")
-	return &mcp.Response{
-		Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Successfully rebalanced holdings:\n%s", resultJSON)}},
+	return &mcp.MCPToolCallResponse{
+		Content: []mcp.MCPContent{{Type: "text", Text: fmt.Sprintf("Successfully rebalanced holdings:\n%s", resultJSON)}},
 	}, nil
 }
 
-func (s *Service) ResetPortfolio(ctx context.Context, params mcp.ResetPortfolioParams) (*mcp.Response, error) {
+func (s *Service) ResetPortfolio(ctx context.Context, params mcp.ResetPortfolioParams) (*mcp.MCPToolCallResponse, error) {
 	// Start a transaction to clear all holdings
 	tx, err := s.database.BeginTx(ctx, nil)
 	if err != nil {
-		return &mcp.Response{
-			Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Error starting transaction: %v", err)}},
+		return &mcp.MCPToolCallResponse{
+			Content: []mcp.MCPContent{{Type: "text", Text: fmt.Sprintf("Error starting transaction: %v", err)}},
 			IsError: true,
 		}, nil
 	}
@@ -297,26 +297,26 @@ func (s *Service) ResetPortfolio(ctx context.Context, params mcp.ResetPortfolioP
 	// Delete all holdings
 	_, err = tx.ExecContext(ctx, "DELETE FROM portfolio_holdings")
 	if err != nil {
-		return &mcp.Response{
-			Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Error clearing portfolio: %v", err)}},
+		return &mcp.MCPToolCallResponse{
+			Content: []mcp.MCPContent{{Type: "text", Text: fmt.Sprintf("Error clearing portfolio: %v", err)}},
 			IsError: true,
 		}, nil
 	}
 
 	// Commit the transaction
 	if err := tx.Commit(); err != nil {
-		return &mcp.Response{
-			Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Error committing transaction: %v", err)}},
+		return &mcp.MCPToolCallResponse{
+			Content: []mcp.MCPContent{{Type: "text", Text: fmt.Sprintf("Error committing transaction: %v", err)}},
 			IsError: true,
 		}, nil
 	}
 
-	return &mcp.Response{
-		Content: []mcp.Content{{Type: "text", Text: "Successfully reset portfolio - all holdings removed"}},
+	return &mcp.MCPToolCallResponse{
+		Content: []mcp.MCPContent{{Type: "text", Text: "Successfully reset portfolio - all holdings removed"}},
 	}, nil
 }
 
-func (s *Service) SetTargetPortfolio(ctx context.Context, params mcp.SetTargetPortfolioParams) (*mcp.Response, error) {
+func (s *Service) SetTargetPortfolio(ctx context.Context, params mcp.SetTargetPortfolioParams) (*mcp.MCPToolCallResponse, error) {
 	// Validate that weights sum to approximately 100%
 	var totalWeight float64
 	for _, holding := range params.Holdings {
@@ -324,8 +324,8 @@ func (s *Service) SetTargetPortfolio(ctx context.Context, params mcp.SetTargetPo
 	}
 
 	if totalWeight < 99.99 || totalWeight > 100.01 {
-		return &mcp.Response{
-			Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Target portfolio weights must sum to ~100%%, got %.3f%%", totalWeight)}},
+		return &mcp.MCPToolCallResponse{
+			Content: []mcp.MCPContent{{Type: "text", Text: fmt.Sprintf("Target portfolio weights must sum to ~100%%, got %.3f%%", totalWeight)}},
 			IsError: true,
 		}, nil
 	}
@@ -333,8 +333,8 @@ func (s *Service) SetTargetPortfolio(ctx context.Context, params mcp.SetTargetPo
 	// Start transaction to replace entire portfolio
 	tx, err := s.database.BeginTx(ctx, nil)
 	if err != nil {
-		return &mcp.Response{
-			Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Error starting transaction: %v", err)}},
+		return &mcp.MCPToolCallResponse{
+			Content: []mcp.MCPContent{{Type: "text", Text: fmt.Sprintf("Error starting transaction: %v", err)}},
 			IsError: true,
 		}, nil
 	}
@@ -345,8 +345,8 @@ func (s *Service) SetTargetPortfolio(ctx context.Context, params mcp.SetTargetPo
 	// Step 1: Clear existing portfolio
 	_, err = tx.ExecContext(ctx, "DELETE FROM portfolio_holdings")
 	if err != nil {
-		return &mcp.Response{
-			Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Error clearing portfolio: %v", err)}},
+		return &mcp.MCPToolCallResponse{
+			Content: []mcp.MCPContent{{Type: "text", Text: fmt.Sprintf("Error clearing portfolio: %v", err)}},
 			IsError: true,
 		}, nil
 	}
@@ -374,8 +374,8 @@ func (s *Service) SetTargetPortfolio(ctx context.Context, params mcp.SetTargetPo
 		})
 
 		if err != nil {
-			return &mcp.Response{
-				Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Error adding %s: %v", holding.Ticker, err)}},
+			return &mcp.MCPToolCallResponse{
+				Content: []mcp.MCPContent{{Type: "text", Text: fmt.Sprintf("Error adding %s: %v", holding.Ticker, err)}},
 				IsError: true,
 			}, nil
 		}
@@ -385,14 +385,14 @@ func (s *Service) SetTargetPortfolio(ctx context.Context, params mcp.SetTargetPo
 
 	// Commit the transaction
 	if err := tx.Commit(); err != nil {
-		return &mcp.Response{
-			Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Error committing transaction: %v", err)}},
+		return &mcp.MCPToolCallResponse{
+			Content: []mcp.MCPContent{{Type: "text", Text: fmt.Sprintf("Error committing transaction: %v", err)}},
 			IsError: true,
 		}, nil
 	}
 
 	resultJSON, _ := json.MarshalIndent(addedHoldings, "", "  ")
-	return &mcp.Response{
-		Content: []mcp.Content{{Type: "text", Text: fmt.Sprintf("Successfully set target portfolio with %d holdings:\n%s", len(addedHoldings), resultJSON)}},
+	return &mcp.MCPToolCallResponse{
+		Content: []mcp.MCPContent{{Type: "text", Text: fmt.Sprintf("Successfully set target portfolio with %d holdings:\n%s", len(addedHoldings), resultJSON)}},
 	}, nil
 }
