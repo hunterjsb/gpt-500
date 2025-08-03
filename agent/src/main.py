@@ -73,6 +73,8 @@ class PortfolioUpdateWorkflow:
         self.log_status("Step 2: Getting current portfolio state...")
         self.status["step"] = 2
 
+        assert self.mcp_client is not None, "MCP client not initialized"
+
         max_retries = 3
         for attempt in range(max_retries):
             try:
@@ -262,16 +264,10 @@ Must sum to {target_weight}% with proper stock count:
             removed = target_tickers.pop()
             self.log_status(f"Removed {removed} (excess stock)")
 
-        # If we have too few, add from strategy watchlist
-        watchlist = ["AAPL", "TSLA", "UNH", "LLY", "MA", "CRM", "BRK.B"]  # From strategy.md
-        while len(target_tickers) < 20:
-            for candidate in watchlist:
-                if candidate not in target_tickers:
-                    target_tickers.append(candidate)
-                    self.log_status(f"Added {candidate} from watchlist")
-                    break
-            if len(target_tickers) >= 20:
-                break
+        # If we have too few, let agent decide what to add
+        if len(target_tickers) < 20:
+            self.log_status(f"Need {20 - len(target_tickers)} more stocks - agent will decide")
+            return None  # Let agent make decisions about which stocks to add
 
         # Create basic holdings structure
         target_stocks = []
@@ -296,49 +292,71 @@ Must sum to {target_weight}% with proper stock count:
         return target_stocks
 
     def assign_sector_weights(self, target_stocks: List[Dict], strategy: str) -> Optional[List[Dict]]:
-        """Assign sector-based weights to exactly 20 stocks."""
-        self.log_status("Assigning sector-based weights...")
+        """Let agent assign sector-based weights to exactly 20 stocks."""
+        self.log_status("Agent will assign sector-based weights...")
 
-        # Sector definitions from strategy
-        core_tickers = ["MSFT", "GOOGL", "AAPL", "NVDA", "AMZN", "META", "AVGO"]  # 7 stocks, ~55%
-        growth_tickers = ["UNH", "LLY", "V", "TSLA", "MA", "CRM", "JNJ"]  # 7 stocks, ~30%
-        # Remaining 6 stocks are defensive, ~15%
-
-        portfolio = []
-
-        for stock in target_stocks:
-            ticker = stock["ticker"]
-
-            if ticker in core_tickers:
-                weight = 55.0 / len(core_tickers)  # ~7.9% each
-                comment = f"CORE: High conviction holding"
-            elif ticker in growth_tickers:
-                weight = 30.0 / len(growth_tickers)  # ~4.3% each
-                comment = f"GROWTH: Medium conviction growth play"
-            else:
-                # Defensive - remaining stocks split the 15%
-                defensive_count = len([s for s in target_stocks if s["ticker"] not in core_tickers + growth_tickers])
-                weight = 15.0 / defensive_count if defensive_count > 0 else 2.5
-                comment = f"DEFENSIVE: Stability and income"
-
-            portfolio.append({
-                "ticker": ticker,
-                "name": stock["name"],
-                "weight": round(weight, 1),
-                "price": stock["price"],
-                "comment": comment
-            })
-
-        return portfolio
+        # Agent should make these decisions, not hardcode them
+        return None  # Return to agent-driven approach
 
     def make_portfolio_decisions(self, strategy: str, portfolio_state: Dict, market_data: Dict) -> Optional[List[Dict]]:
-        """Main portfolio decision method using refined loop."""
-        return self.refined_portfolio_update_loop(strategy, portfolio_state, market_data)
+        """Use agent to make portfolio decisions with basic validation."""
+        self.log_status("Step 4: Making portfolio decisions...")
+        self.status["step"] = 4
+
+        # Simple prompt for agent to construct exactly 20 stocks = 100%
+        decision_prompt = f"""
+Current portfolio has {len(portfolio_state['holdings'])} holdings.
+Strategy: {strategy[:500]}...
+
+Construct exactly 20 stocks totaling 100.000%.
+
+Output JSON only:
+[{{"ticker":"MSFT","name":"Microsoft","weight":8.0,"price":524,"comment":"reason"}}, ...]
+
+Must be exactly 20 stocks, 100.000% total.
+"""
+
+        try:
+            local_tools = [calculator, get_stock_info, get_multiple_stocks_info]
+
+            agent = Agent(
+                model=OpenAIModel(client_args={"api_key": API_KEY}, model_id=MODEL_ID),
+                system_prompt="Portfolio manager. Output 20 stocks JSON. Total = 100%.",
+                tools=local_tools,
+            )
+
+            response = agent(decision_prompt)
+
+            # Parse JSON
+            response_text = str(response)
+            start_idx = response_text.find('[')
+            end_idx = response_text.rfind(']') + 1
+
+            if start_idx == -1 or end_idx == 0:
+                raise ValueError("No JSON found")
+
+            json_str = response_text[start_idx:end_idx]
+            target_portfolio = json.loads(json_str)
+
+            # Validate
+            is_valid, message = self.validate_portfolio_weights(target_portfolio)
+            if is_valid:
+                self.log_status(message, "SUCCESS")
+                return target_portfolio
+            else:
+                self.log_status(f"Validation failed: {message}", "ERROR")
+                return None
+
+        except Exception as e:
+            self.log_status(f"Decision making failed: {e}", "ERROR")
+            return None
 
     def execute_portfolio_update(self, target_portfolio: List[Dict]) -> bool:
         """Execute portfolio update with validation."""
         self.log_status("Step 5: Executing portfolio update...")
         self.status["step"] = 5
+
+        assert self.mcp_client is not None, "MCP client not initialized"
 
         max_retries = 2
         for attempt in range(max_retries):
