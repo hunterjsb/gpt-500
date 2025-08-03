@@ -126,3 +126,14 @@ python3 -m src.main
 - **Dependencies**: Minimal - Strands framework + OpenAI client
 
 This architecture provides a solid foundation for AI agents that need to maintain structured data files with autonomous decision-making capabilities.
+
+## Important Notes
+
+### Tool Visibility
+**Do not list available tools in prompts.** The agent can see all available tools when they are passed to it in `src/main.py`. Listing tools in prompts creates maintenance overhead and can lead to incorrect tool names. The agent will automatically discover and use the tools provided to it.
+
+### Prompt Design
+- Focus prompts on **what** the agent should accomplish, not **how** 
+- Provide decision frameworks and quality criteria
+- Avoid tool-specific instructions that may become outdated
+- Let the agent discover the best tools for each task
