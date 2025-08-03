@@ -48,8 +48,6 @@ class PortfolioUpdateWorkflow:
         elif level == "WARNING":
             self.status["warnings"].append(message)
 
-
-
     def read_strategy(self) -> Optional[str]:
         """Read current strategy document."""
         self.log_status("Step 1: Reading strategy document...")
@@ -57,7 +55,7 @@ class PortfolioUpdateWorkflow:
 
         try:
             if Path(self.strategy_path).exists():
-                with open(self.strategy_path, 'r') as f:
+                with open(self.strategy_path, "r") as f:
                     content = f.read()
                 self.log_status(f"Strategy document loaded ({len(content)} chars)", "SUCCESS")
                 return content
@@ -95,11 +93,7 @@ class PortfolioUpdateWorkflow:
                         if "text" in content_item:
                             summary_data = json.loads(content_item["text"])
 
-                    portfolio_state = {
-                        "holdings": holdings_data,
-                        "summary": summary_data,
-                        "count": len(holdings_data)
-                    }
+                    portfolio_state = {"holdings": holdings_data, "summary": summary_data, "count": len(holdings_data)}
 
                     self.log_status(f"Portfolio state retrieved - {portfolio_state['count']} holdings", "SUCCESS")
                     return portfolio_state
@@ -130,7 +124,7 @@ class PortfolioUpdateWorkflow:
             market_data = {
                 "market_summary": market_summary,
                 "stocks_info": stocks_info,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
             self.log_status(f"Market data retrieved for {len(tickers)} tickers", "SUCCESS")
@@ -151,34 +145,37 @@ class PortfolioUpdateWorkflow:
 
         return True, f"Valid portfolio: 20 holdings, {total_weight:.3f}% total"
 
-    def update_sector_holdings(self, sector_name: str, target_weight: float, current_holdings: List[Dict],
-                              strategy: str, market_data: Dict) -> Optional[List[Dict]]:
+    def update_sector_holdings(
+        self, sector_name: str, target_weight: float, current_holdings: List[Dict], strategy: str, market_data: Dict
+    ) -> Optional[List[Dict]]:
         """Update holdings for a specific sector with simplified math."""
         self.log_status(f"Updating {sector_name} sector (target: {target_weight}% of portfolio)")
 
         max_attempts = 2
         for attempt in range(max_attempts):
             try:
-                current_sector_holdings = [h for h in current_holdings if sector_name.lower() in h.get('Comment', {}).get('String', '').lower()]
-                current_sector_weight = sum(float(h.get('Weight', '0')) for h in current_sector_holdings)
+                current_sector_holdings = [
+                    h for h in current_holdings if sector_name.lower() in h.get("Comment", {}).get("String", "").lower()
+                ]
+                current_sector_weight = sum(float(h.get("Weight", "0")) for h in current_sector_holdings)
 
                 sector_prompt = f"""
-{sector_name} sector target: {target_weight}%
-Current sector weight: {current_sector_weight:.1f}%
+                                {sector_name} sector target: {target_weight}%
+                                Current sector weight: {current_sector_weight:.1f}%
 
-Existing {sector_name} holdings:
-{json.dumps(current_sector_holdings, indent=1)}
+                                Existing {sector_name} holdings:
+                                {json.dumps(current_sector_holdings, indent=1)}
 
-TASK: Return JSON array that totals exactly {target_weight}%.
-Target stock count: {7 if sector_name == 'CORE' else 7 if sector_name == 'GROWTH' else 6} stocks
-You can:
-- Adjust weights of existing stocks
-- Add new stocks to reach target
-- Remove underperforming stocks
+                                TASK: Return JSON array that totals exactly {target_weight}%.
+                                Target stock count: {7 if sector_name == 'CORE' else 7 if sector_name == 'GROWTH' else 6} stocks
+                                You can:
+                                - Adjust weights of existing stocks
+                                - Add new stocks to reach target
+                                - Remove underperforming stocks
 
-Format: {{"ticker":"MSFT","name":"Microsoft","weight":8.5,"price":524,"comment":"{sector_name}: reason"}}
-Must sum to {target_weight}% with proper stock count:
-"""
+                                Format: {{"ticker":"MSFT","name":"Microsoft","weight":8.5,"price":524,"comment":"{sector_name}: reason"}}
+                                Must sum to {target_weight}% with proper stock count:
+                                """
 
                 local_tools = [calculator, get_stock_info, get_multiple_stocks_info]
 
@@ -192,8 +189,8 @@ Must sum to {target_weight}% with proper stock count:
 
                 # Parse response
                 response_text = str(response)
-                start_idx = response_text.find('[')
-                end_idx = response_text.rfind(']') + 1
+                start_idx = response_text.find("[")
+                end_idx = response_text.rfind("]") + 1
 
                 if start_idx == -1 or end_idx == 0:
                     raise ValueError("No JSON array found")
@@ -205,13 +202,18 @@ Must sum to {target_weight}% with proper stock count:
                 sector_total = sum(h.get("weight", 0) for h in sector_holdings)
                 if abs(sector_total - target_weight) > 0.1:
                     if attempt == 0:
-                        self.log_status(f"{sector_name} attempt {attempt + 1}: {sector_total}% vs target {target_weight}%", "WARNING")
+                        self.log_status(
+                            f"{sector_name} attempt {attempt + 1}: {sector_total}% vs target {target_weight}%",
+                            "WARNING",
+                        )
                         continue
                     else:
                         self.log_status(f"{sector_name} validation failed after retries", "ERROR")
                         return None
 
-                self.log_status(f"{sector_name} sector updated: {len(sector_holdings)} holdings, {sector_total}%", "SUCCESS")
+                self.log_status(
+                    f"{sector_name} sector updated: {len(sector_holdings)} holdings, {sector_total}%", "SUCCESS"
+                )
                 return sector_holdings
 
             except Exception as e:
@@ -219,7 +221,9 @@ Must sum to {target_weight}% with proper stock count:
 
         return None
 
-    def refined_portfolio_update_loop(self, strategy: str, portfolio_state: Dict, market_data: Dict) -> Optional[List[Dict]]:
+    def refined_portfolio_update_loop(
+        self, strategy: str, portfolio_state: Dict, market_data: Dict
+    ) -> Optional[List[Dict]]:
         """Refined portfolio update loop with validation checkpoints."""
         self.log_status("Step 4: Refined portfolio update loop...")
         self.status["step"] = 4
@@ -251,7 +255,9 @@ Must sum to {target_weight}% with proper stock count:
 
         return target_portfolio
 
-    def adjust_stock_count(self, current_holdings: List[Dict], strategy: str, market_data: Dict) -> Optional[List[Dict]]:
+    def adjust_stock_count(
+        self, current_holdings: List[Dict], strategy: str, market_data: Dict
+    ) -> Optional[List[Dict]]:
         """Add/remove stocks to get exactly 20."""
         self.log_status(f"Adjusting stock count from {len(current_holdings)} to 20...")
 
@@ -275,19 +281,23 @@ Must sum to {target_weight}% with proper stock count:
             # Find existing holding or create new one
             existing = next((h for h in current_holdings if h["Ticker"] == ticker), None)
             if existing:
-                target_stocks.append({
-                    "ticker": ticker,
-                    "name": existing["Name"],
-                    "price": float(existing["Price"]) if existing["Price"] != "0.0000" else 0.0,
-                    "weight": 5.0  # Placeholder
-                })
+                target_stocks.append(
+                    {
+                        "ticker": ticker,
+                        "name": existing["Name"],
+                        "price": float(existing["Price"]) if existing["Price"] != "0.0000" else 0.0,
+                        "weight": 5.0,  # Placeholder
+                    }
+                )
             else:
-                target_stocks.append({
-                    "ticker": ticker,
-                    "name": f"{ticker} Corp",  # Placeholder
-                    "price": 0.0,  # Will be updated
-                    "weight": 5.0  # Placeholder
-                })
+                target_stocks.append(
+                    {
+                        "ticker": ticker,
+                        "name": f"{ticker} Corp",  # Placeholder
+                        "price": 0.0,  # Will be updated
+                        "weight": 5.0,  # Placeholder
+                    }
+                )
 
         return target_stocks
 
@@ -305,16 +315,16 @@ Must sum to {target_weight}% with proper stock count:
 
         # Simple prompt for agent to construct exactly 20 stocks = 100%
         decision_prompt = f"""
-Current portfolio has {len(portfolio_state['holdings'])} holdings.
-Strategy: {strategy[:500]}...
+                          Current portfolio has {len(portfolio_state['holdings'])} holdings.
+                          Strategy: {strategy[:500]}...
 
-Construct exactly 20 stocks totaling 100.000%.
+                          Construct exactly 20 stocks totaling 100.000%.
 
-Output JSON only:
-[{{"ticker":"MSFT","name":"Microsoft","weight":8.0,"price":524,"comment":"reason"}}, ...]
+                          Output JSON only:
+                          [{{"ticker":"MSFT","name":"Microsoft","weight":8.0,"price":524,"comment":"reason"}}, ...]
 
-Must be exactly 20 stocks, 100.000% total.
-"""
+                          Must be exactly 20 stocks, 100.000% total.
+                          """
 
         try:
             local_tools = [calculator, get_stock_info, get_multiple_stocks_info]
@@ -329,8 +339,8 @@ Must be exactly 20 stocks, 100.000% total.
 
             # Parse JSON
             response_text = str(response)
-            start_idx = response_text.find('[')
-            end_idx = response_text.rfind(']') + 1
+            start_idx = response_text.find("[")
+            end_idx = response_text.rfind("]") + 1
 
             if start_idx == -1 or end_idx == 0:
                 raise ValueError("No JSON found")
@@ -364,16 +374,20 @@ Must be exactly 20 stocks, 100.000% total.
                 # Prepare holdings for MCP call
                 holdings_payload = []
                 for holding in target_portfolio:
-                    holdings_payload.append({
-                        "ticker": holding["ticker"],
-                        "name": holding["name"],
-                        "weight": float(holding["weight"]),
-                        "price": float(holding.get("price", 0)),
-                        "comment": holding.get("comment", "")
-                    })
+                    holdings_payload.append(
+                        {
+                            "ticker": holding["ticker"],
+                            "name": holding["name"],
+                            "weight": float(holding["weight"]),
+                            "price": float(holding.get("price", 0)),
+                            "comment": holding.get("comment", ""),
+                        }
+                    )
 
                 # Execute update
-                result = self.mcp_client.call_tool_sync("portfolio_update", "set_target_portfolio", {"holdings": holdings_payload})
+                result = self.mcp_client.call_tool_sync(
+                    "portfolio_update", "set_target_portfolio", {"holdings": holdings_payload}
+                )
 
                 if result and "content" in result:
                     self.log_status("Portfolio update executed successfully", "SUCCESS")
@@ -406,25 +420,28 @@ Must be exactly 20 stocks, 100.000% total.
             # Create updated strategy content
             timestamp = datetime.now().strftime("%B %Y")
 
-            updated_strategy = strategy + f"""
+            updated_strategy = (
+                strategy
+                + f"""
 
 ## Recent Updates ({timestamp})
 
 ### Portfolio Changes
 """
+            )
             for change in changes:
                 updated_strategy += f"- {change.get('action', 'Updated')} {change.get('ticker', 'N/A')}: {change.get('reason', 'No reason provided')}\n"
 
             updated_strategy += f"""
-### Market Assessment Update
-- Market regime: {market_data.get('market_summary', {}).get('success', 'Unknown')}
-- Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M')}
-- Next review: {(datetime.now()).strftime('%Y-%m-%d')} (quarterly)
-"""
+                                ### Market Assessment Update
+                                - Market regime: {market_data.get('market_summary', {}).get('success', 'Unknown')}
+                                - Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M')}
+                                - Next review: {(datetime.now()).strftime('%Y-%m-%d')} (quarterly)
+                                """
 
             # Write updated strategy
             Path(self.strategy_path).parent.mkdir(parents=True, exist_ok=True)
-            with open(self.strategy_path, 'w') as f:
+            with open(self.strategy_path, "w") as f:
                 f.write(updated_strategy)
 
             self.log_status("Strategy document updated", "SUCCESS")
@@ -457,9 +474,7 @@ Must be exactly 20 stocks, 100.000% total.
 
         try:
             # Initialize MCP client
-            self.mcp_client = MCPClient(
-                lambda: streamablehttp_client("http://localhost:8080/mcp")
-            )
+            self.mcp_client = MCPClient(lambda: streamablehttp_client("http://localhost:8080/mcp"))
 
             # Run entire workflow within MCP context
             with self.mcp_client:
@@ -493,7 +508,9 @@ Must be exactly 20 stocks, 100.000% total.
                     return False
 
                 # Step 6: Update strategy
-                changes = [{"action": "Rebalanced", "ticker": "Portfolio", "reason": "Quarterly review and market analysis"}]
+                changes = [
+                    {"action": "Rebalanced", "ticker": "Portfolio", "reason": "Quarterly review and market analysis"}
+                ]
                 if not self.update_strategy(strategy, changes, market_data):
                     self.log_status("Strategy update failed but portfolio was updated", "WARNING")
 
@@ -544,9 +561,7 @@ def run_migration_mode():
         return
 
     try:
-        mcp_client = MCPClient(
-            lambda: streamablehttp_client("http://localhost:8080/mcp")
-        )
+        mcp_client = MCPClient(lambda: streamablehttp_client("http://localhost:8080/mcp"))
 
         with mcp_client:
             portfolio_tools = mcp_client.list_tools_sync()

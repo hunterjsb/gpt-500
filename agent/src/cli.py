@@ -69,13 +69,7 @@ def generate_markdown_from_database() -> None:
     try:
         # Path to the portfolio-db service
         portfolio_db_path = "/home/hunter/Desktop/claude-20/services/portfolio-db"
-        result = subprocess.run(
-            ["./generate-md"],
-            cwd=portfolio_db_path,
-            capture_output=True,
-            text=True,
-            timeout=30
-        )
+        result = subprocess.run(["./generate-md"], cwd=portfolio_db_path, capture_output=True, text=True, timeout=30)
 
         if result.returncode == 0:
             print(MD_SUCCESS_MSG)
