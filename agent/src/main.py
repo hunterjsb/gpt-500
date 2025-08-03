@@ -221,109 +221,23 @@ class PortfolioUpdateWorkflow:
 
         return None
 
-    def refined_portfolio_update_loop(
-        self, strategy: str, portfolio_state: Dict, market_data: Dict
-    ) -> Optional[List[Dict]]:
-        """Refined portfolio update loop with validation checkpoints."""
-        self.log_status("Step 4: Refined portfolio update loop...")
-        self.status["step"] = 4
 
-        current_holdings = portfolio_state["holdings"]
-
-        # Step 1: Add/Remove to get exactly 20 stocks
-        target_stocks = self.adjust_stock_count(current_holdings, strategy, market_data)
-        if target_stocks is None:
-            return None
-
-        # Step 2: Verify total count
-        if len(target_stocks) != 20:
-            self.log_status(f"Stock count error: {len(target_stocks)} instead of 20", "ERROR")
-            return None
-        self.log_status(f"✓ Stock count verified: {len(target_stocks)} stocks", "SUCCESS")
-
-        # Step 3: Iterate over sectors to assign weights
-        target_portfolio = self.assign_sector_weights(target_stocks, strategy)
-        if target_portfolio is None:
-            return None
-
-        # Step 4: Verify total weights = 100%
-        total_weight = sum(h.get("weight", 0) for h in target_portfolio)
-        if abs(total_weight - 100.0) > 0.01:
-            self.log_status(f"Weight error: {total_weight:.3f}% instead of 100%", "ERROR")
-            return None
-        self.log_status(f"✓ Weight verified: {total_weight:.3f}%", "SUCCESS")
-
-        return target_portfolio
-
-    def adjust_stock_count(
-        self, current_holdings: List[Dict], strategy: str, market_data: Dict
-    ) -> Optional[List[Dict]]:
-        """Add/remove stocks to get exactly 20."""
-        self.log_status(f"Adjusting stock count from {len(current_holdings)} to 20...")
-
-        current_tickers = [h["Ticker"] for h in current_holdings]
-        target_tickers = current_tickers.copy()
-
-        # If we have too many, remove worst performers
-        while len(target_tickers) > 20:
-            # Simple removal - remove last one (could be smarter)
-            removed = target_tickers.pop()
-            self.log_status(f"Removed {removed} (excess stock)")
-
-        # If we have too few, let agent decide what to add
-        if len(target_tickers) < 20:
-            self.log_status(f"Need {20 - len(target_tickers)} more stocks - agent will decide")
-            return None  # Let agent make decisions about which stocks to add
-
-        # Create basic holdings structure
-        target_stocks = []
-        for ticker in target_tickers[:20]:
-            # Find existing holding or create new one
-            existing = next((h for h in current_holdings if h["Ticker"] == ticker), None)
-            if existing:
-                target_stocks.append(
-                    {
-                        "ticker": ticker,
-                        "name": existing["Name"],
-                        "price": float(existing["Price"]) if existing["Price"] != "0.0000" else 0.0,
-                        "weight": 5.0,  # Placeholder
-                    }
-                )
-            else:
-                target_stocks.append(
-                    {
-                        "ticker": ticker,
-                        "name": f"{ticker} Corp",  # Placeholder
-                        "price": 0.0,  # Will be updated
-                        "weight": 5.0,  # Placeholder
-                    }
-                )
-
-        return target_stocks
-
-    def assign_sector_weights(self, target_stocks: List[Dict], strategy: str) -> Optional[List[Dict]]:
-        """Let agent assign sector-based weights to exactly 20 stocks."""
-        self.log_status("Agent will assign sector-based weights...")
-
-        # Agent should make these decisions, not hardcode them
-        return None  # Return to agent-driven approach
 
     def make_portfolio_decisions(self, strategy: str, portfolio_state: Dict, market_data: Dict) -> Optional[List[Dict]]:
         """Use agent to make portfolio decisions with basic validation."""
         self.log_status("Step 4: Making portfolio decisions...")
         self.status["step"] = 4
 
-        # Simple prompt for agent to construct exactly 20 stocks = 100%
         decision_prompt = f"""
                           Current portfolio has {len(portfolio_state['holdings'])} holdings.
-                          Strategy: {strategy[:500]}...
+                          Strategy: {strategy}
 
-                          Construct exactly 20 stocks totaling 100.000%.
+                          Construct exactly 20 stocks totaling 100%.
 
                           Output JSON only:
                           [{{"ticker":"MSFT","name":"Microsoft","weight":8.0,"price":524,"comment":"reason"}}, ...]
 
-                          Must be exactly 20 stocks, 100.000% total.
+                          Must be exactly 20 stocks, 100% total.
                           """
 
         try:
@@ -348,32 +262,13 @@ class PortfolioUpdateWorkflow:
             json_str = response_text[start_idx:end_idx]
             target_portfolio = json.loads(json_str)
 
-            # Replace smallest holding with VOO to reach 100%
-            total_weight = sum(h.get("weight", 0) for h in target_portfolio)
-            if total_weight < 100.0:
-                missing_weight = 100.0 - total_weight
-                # Find smallest holding to replace
-                smallest_holding = min(target_portfolio, key=lambda x: x.get("weight", 0))
-                smallest_weight = smallest_holding.get("weight", 0)
-                self.log_status(f"Replacing {smallest_holding['ticker']} ({smallest_weight}%) with VOO ({missing_weight + smallest_weight:.3f}%)", "INFO")
-
-                # Remove smallest holding and add VOO with combined weight
-                target_portfolio.remove(smallest_holding)
-                target_portfolio.append({
-                    "ticker": "VOO",
-                    "name": "Vanguard S&P 500 ETF",
-                    "weight": round(missing_weight + smallest_weight, 3),
-                    "price": 0.0,
-                    "comment": "Replaced smallest holding to reach 100% total"
-                })
-
-            # Validate after auto-fill
+            # Validate portfolio
             is_valid, message = self.validate_portfolio_weights(target_portfolio)
             if is_valid:
                 self.log_status(message, "SUCCESS")
                 return target_portfolio
             else:
-                self.log_status(f"Validation failed even after auto-fill: {message}", "ERROR")
+                self.log_status(f"Validation failed: {message}", "ERROR")
                 return None
 
         except Exception as e:
