@@ -348,13 +348,32 @@ class PortfolioUpdateWorkflow:
             json_str = response_text[start_idx:end_idx]
             target_portfolio = json.loads(json_str)
 
-            # Validate
+            # Replace smallest holding with VOO to reach 100%
+            total_weight = sum(h.get("weight", 0) for h in target_portfolio)
+            if total_weight < 100.0:
+                missing_weight = 100.0 - total_weight
+                # Find smallest holding to replace
+                smallest_holding = min(target_portfolio, key=lambda x: x.get("weight", 0))
+                smallest_weight = smallest_holding.get("weight", 0)
+                self.log_status(f"Replacing {smallest_holding['ticker']} ({smallest_weight}%) with VOO ({missing_weight + smallest_weight:.3f}%)", "INFO")
+
+                # Remove smallest holding and add VOO with combined weight
+                target_portfolio.remove(smallest_holding)
+                target_portfolio.append({
+                    "ticker": "VOO",
+                    "name": "Vanguard S&P 500 ETF",
+                    "weight": round(missing_weight + smallest_weight, 3),
+                    "price": 0.0,
+                    "comment": "Replaced smallest holding to reach 100% total"
+                })
+
+            # Validate after auto-fill
             is_valid, message = self.validate_portfolio_weights(target_portfolio)
             if is_valid:
                 self.log_status(message, "SUCCESS")
                 return target_portfolio
             else:
-                self.log_status(f"Validation failed: {message}", "ERROR")
+                self.log_status(f"Validation failed even after auto-fill: {message}", "ERROR")
                 return None
 
         except Exception as e:
